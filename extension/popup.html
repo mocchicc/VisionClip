@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisionClip</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>VisionClip</h1>
+        <p>Image OCR to Clipboard</p>
+      </div>
+      <button id="refresh" type="button">更新</button>
+    </header>
+    <section class="status-card">
+      <div class="row"><span>APIキー</span><strong id="key-status">確認中...</strong></div>
+      <div class="row"><span>状態</span><strong id="run-status">確認中...</strong></div>
+      <p id="status-message" class="message"></p>
+    </section>
+    <section>
+      <h2>最近5件</h2>
+      <div id="history" class="history"></div>
+    </section>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

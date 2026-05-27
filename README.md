@@ -62,13 +62,15 @@ cd "/Users/mocchicc/Documents/VisionClip"
 4. 成功すると、読み取った文字がクリップボードに入る
 5. 好きな場所に貼り付ける
 
+Chrome右上の拡張ボタンから `VisionClip - Image OCR to Clipboard` を開くと、APIキーの状態、直近の実行状態、最近5件の履歴を確認できます。
+
 ## うまく動かないとき
 
-### 右クリックメニューが出ない
+### 右クリックメニューやpopupが更新されない
 
 Chrome拡張が読み込まれているか確認してください。
 
-`chrome://extensions` を開いて、`VisionClip - Image OCR to Clipboard` がONになっていればOKです。
+`chrome://extensions` を開いて、`VisionClip - Image OCR to Clipboard` がONになっていればOKです。コードを更新した後は、その画面で拡張のreloadボタンを押してください。
 
 ### APIキーが登録されているか確認したい
 
@@ -88,8 +90,12 @@ Chrome拡張が読み込まれているか確認してください。
 
 ### テストで画像URLを直接OCRしたい
 
+画像URLは実在する画像を指定してください。`https://example.com/image.png` はダミーなので使えません。
+
+Chrome上の画像で試すほうが簡単ですが、CLIで試す場合は、実在するPNG/JPEG/WEBP/GIFのURLを指定します。
+
 ```sh
-"$HOME/Library/Application Support/VisionClip/image-ocr-host" ocr-url "https://example.com/image.png"
+"$HOME/Library/Application Support/VisionClip/image-ocr-host" ocr-url "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/320px-Example.jpg"
 ```
 
 成功すると、結果が表示され、同時にクリップボードにもコピーされます。
@@ -110,7 +116,7 @@ APIキーも消したい場合は、先に次を実行します。
 
 - PNG、JPEG、WEBP、非アニメーションGIFが主な対象です。
 - ログインが必要なページの画像は、画像の取り方によって失敗することがあります。
-- まだメニューバーアプリ、履歴、設定画面、モデル切り替えUIはありません。
+- まだメニューバーアプリ、設定画面、モデル切り替えUIはありません。
 
 ## 技術メモ
 

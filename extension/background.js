@@ -1,6 +1,7 @@
 const HOST_NAME = "com.mocchicc.visionclip";
 const MENU_ID = "ocr-image";
 const MAX_INLINE_IMAGE_BYTES = 12 * 1024 * 1024;
+const HISTORY_LIMIT = 5;
 const recentContextImages = new Map();
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -11,16 +12,25 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
-chrome.runtime.onMessage.addListener((message, sender) => {
-  if (message?.type !== "remember_context_image" || sender.tab?.id == null) {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "remember_context_image" && sender.tab?.id != null) {
+    recentContextImages.set(sender.tab.id, {
+      imageUrl: message.imageUrl,
+      imageDataUrl: message.imageDataUrl,
+      capturedAt: Date.now()
+    });
     return;
   }
 
-  recentContextImages.set(sender.tab.id, {
-    imageUrl: message.imageUrl,
-    imageDataUrl: message.imageDataUrl,
-    capturedAt: Date.now()
-  });
+  if (message?.type === "get_dashboard") {
+    getDashboard()
+      .then(sendResponse)
+      .catch((error) => sendResponse({
+        ok: false,
+        error: error?.message || String(error)
+      }));
+    return true;
+  }
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -28,7 +38,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     return;
   }
 
+  const startedAt = Date.now();
   await setBadge("...", "#4f46e5");
+  await saveCurrentStatus({
+    state: "running",
+    title: "OCR処理中",
+    message: tab?.title || info.pageUrl || "画像を読み取っています。",
+    startedAt,
+    updatedAt: startedAt
+  });
 
   try {
     const payload = await buildOCRPayload(info, tab);
@@ -38,15 +56,86 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       throw new Error(response?.error || "OCR failed.");
     }
 
+    const finishedAt = Date.now();
     await setBadge("OK", "#15803d");
+    await saveCurrentStatus({
+      state: "success",
+      title: "OCR成功",
+      message: "抽出テキストをクリップボードにコピーしました。",
+      updatedAt: finishedAt
+    });
+    await addHistory({
+      state: "success",
+      title: tab?.title || "画像OCR",
+      message: response.textPreview || "抽出テキストをコピーしました。",
+      imageUrl: payload.imageUrl,
+      pageUrl: info.pageUrl,
+      model: response.model,
+      copied: response.copied === true,
+      createdAt: finishedAt
+    });
     showToast(tab?.id, "OCR copied", "抽出テキストをクリップボードにコピーしました。", "success");
   } catch (error) {
+    const finishedAt = Date.now();
+    const message = error?.message || String(error);
     await setBadge("ERR", "#b91c1c");
-    showToast(tab?.id, "OCR failed", error?.message || String(error), "error");
+    await saveCurrentStatus({
+      state: "error",
+      title: "OCR失敗",
+      message,
+      updatedAt: finishedAt
+    });
+    await addHistory({
+      state: "error",
+      title: tab?.title || "画像OCR",
+      message,
+      imageUrl: info.srcUrl,
+      pageUrl: info.pageUrl,
+      createdAt: finishedAt
+    });
+    showToast(tab?.id, "OCR failed", message, "error");
   } finally {
     setTimeout(() => chrome.action.setBadgeText({ text: "" }), 3500);
   }
 });
+
+async function getDashboard() {
+  const [nativeStatus, stored] = await Promise.all([
+    getNativeStatus(),
+    chrome.storage.local.get(["currentStatus", "history"])
+  ]);
+
+  return {
+    ok: true,
+    nativeStatus,
+    currentStatus: stored.currentStatus || null,
+    history: stored.history || []
+  };
+}
+
+async function getNativeStatus() {
+  try {
+    const response = await sendNativeMessage({ type: "status" });
+    return response || { ok: false, error: "No response from native host." };
+  } catch (error) {
+    return {
+      ok: false,
+      keyIsSet: false,
+      error: error?.message || String(error)
+    };
+  }
+}
+
+async function saveCurrentStatus(status) {
+  await chrome.storage.local.set({ currentStatus: status });
+}
+
+async function addHistory(item) {
+  const { history = [] } = await chrome.storage.local.get("history");
+  await chrome.storage.local.set({
+    history: [item, ...history].slice(0, HISTORY_LIMIT)
+  });
+}
 
 async function buildOCRPayload(info, tab) {
   const srcUrl = info.srcUrl || "";

@@ -5,6 +5,7 @@ import Darwin
 private enum Config {
     static let hostName = "com.mocchicc.visionclip"
     static let keychainService = "com.mocchicc.visionclip.openai"
+    static let legacyKeychainService = "com.mocchicc.image_ocr.openai"
     static let keychainAccount = "default"
     static let defaultModel = "gpt-4.1-mini"
     static let defaultDetail = "high"
@@ -63,6 +64,8 @@ private struct NativeResponse: Encodable {
     let copied: Bool?
     let model: String?
     let error: String?
+    var keyIsSet: Bool? = nil
+    var version: String? = nil
 }
 
 @main
@@ -187,6 +190,18 @@ struct ImageOCRHost {
 
 private final class OCRService {
     func process(_ request: OCRRequest) async throws -> NativeResponse {
+        if request.type == "status" {
+            return NativeResponse(
+                ok: true,
+                textPreview: nil,
+                copied: nil,
+                model: Config.defaultModel,
+                error: nil,
+                keyIsSet: (try? KeychainStore.readAPIKey()) != nil,
+                version: "0.1.0"
+            )
+        }
+
         guard request.type == nil || request.type == "ocr_image" else {
             throw HostError.invalidNativeMessage
         }
@@ -254,11 +269,19 @@ private enum NativeMessaging {
 
 private enum KeychainStore {
     static func readAPIKey() throws -> String {
+        do {
+            return try readAPIKey(service: Config.keychainService)
+        } catch HostError.missingAPIKey {
+            return try readAPIKey(service: Config.legacyKeychainService)
+        }
+    }
+
+    private static func readAPIKey(service: String) throws -> String {
         let result = try ProcessRunner.run(
             "/usr/bin/security",
             arguments: [
                 "find-generic-password",
-                "-s", Config.keychainService,
+                "-s", service,
                 "-a", Config.keychainAccount,
                 "-w"
             ]
@@ -297,17 +320,20 @@ private enum KeychainStore {
     }
 
     static func deleteAPIKey() throws {
-        let result = try ProcessRunner.run(
-            "/usr/bin/security",
-            arguments: [
-                "delete-generic-password",
-                "-s", Config.keychainService,
-                "-a", Config.keychainAccount
-            ]
-        )
+        let services = [Config.keychainService, Config.legacyKeychainService]
+        for service in services {
+            let result = try ProcessRunner.run(
+                "/usr/bin/security",
+                arguments: [
+                    "delete-generic-password",
+                    "-s", service,
+                    "-a", Config.keychainAccount
+                ]
+            )
 
-        guard result.status == 0 || result.status == 44 else {
-            throw HostError.keychainError(result.status, result.stderrText)
+            guard result.status == 0 || result.status == 44 else {
+                throw HostError.keychainError(result.status, result.stderrText)
+            }
         }
     }
 }

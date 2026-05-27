@@ -6,7 +6,8 @@
   "permissions": [
     "activeTab",
     "contextMenus",
-    "nativeMessaging"
+    "nativeMessaging",
+    "storage"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -26,6 +27,7 @@
     }
   ],
   "action": {
-    "default_title": "VisionClip - Image OCR to Clipboard"
+    "default_title": "VisionClip - Image OCR to Clipboard",
+    "default_popup": "popup.html"
   }
 }
