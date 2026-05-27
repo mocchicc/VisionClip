@@ -10,6 +10,7 @@ LEGACY_CHROME_HOST_MANIFEST="$HOME/Library/Application Support/Google/Chrome/Nat
 rm -f "$CHROME_HOST_MANIFEST"
 rm -f "$LEGACY_CHROME_HOST_MANIFEST"
 rm -f "$INSTALL_DIR/image-ocr-host"
+rm -f "$INSTALL_DIR/visionclip-native-host"
 rmdir "$INSTALL_DIR" 2>/dev/null || true
 
 echo "Removed native host binary and Chrome manifest."

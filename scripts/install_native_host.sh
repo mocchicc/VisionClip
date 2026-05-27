@@ -13,6 +13,7 @@ LEGACY_HOST_NAME="com.mocchicc.image_ocr"
 INSTALL_DIR="$HOME/Library/Application Support/VisionClip"
 CHROME_HOST_DIR="$HOME/Library/Application Support/Google/Chrome/NativeMessagingHosts"
 HOST_BINARY="$INSTALL_DIR/image-ocr-host"
+HOST_WRAPPER="$INSTALL_DIR/visionclip-native-host"
 HOST_MANIFEST="$CHROME_HOST_DIR/$HOST_NAME.json"
 LEGACY_HOST_MANIFEST="$CHROME_HOST_DIR/$LEGACY_HOST_NAME.json"
 
@@ -32,6 +33,16 @@ cp "$ROOT_DIR/native-host/.build/release/image-ocr-host" "$HOST_BINARY"
 chmod 755 "$HOST_BINARY"
 xattr -c "$HOST_BINARY" 2>/dev/null || true
 
+cat > "$HOST_WRAPPER" <<SH
+#!/usr/bin/env bash
+set -euo pipefail
+LOG_FILE="/tmp/visionclip-native-wrapper.log"
+printf '[%s] wrapper launch\n' "\$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "\$LOG_FILE" 2>/dev/null || true
+exec "$HOST_BINARY"
+SH
+chmod 755 "$HOST_WRAPPER"
+xattr -c "$HOST_WRAPPER" 2>/dev/null || true
+
 ALLOWED_ORIGINS_JSON=""
 for extension_id in "${EXTENSION_IDS[@]}"; do
   origin="chrome-extension://$extension_id/"
@@ -50,7 +61,7 @@ for manifest in "$HOST_MANIFEST" "$LEGACY_HOST_MANIFEST"; do
 {
   "name": "$name",
   "description": "VisionClip native messaging host",
-  "path": "$HOST_BINARY",
+  "path": "$HOST_WRAPPER",
   "type": "stdio",
   "allowed_origins": [
 $ALLOWED_ORIGINS_JSON
@@ -61,6 +72,7 @@ done
 
 echo "Installed native host:"
 echo "  $HOST_BINARY"
+echo "  $HOST_WRAPPER"
 echo "  $HOST_MANIFEST"
 echo "  $LEGACY_HOST_MANIFEST"
 echo
