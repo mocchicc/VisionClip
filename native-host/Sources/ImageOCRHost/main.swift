@@ -9,6 +9,7 @@ private enum Config {
     static let keychainAccount = "default"
     static let defaultModel = "gpt-4.1-mini"
     static let defaultDetail = "high"
+    static let logPath = NSHomeDirectory() + "/Library/Logs/VisionClip/native-host.log"
     static let maxImageBytes = 50 * 1024 * 1024
     static let maxNativeResponsePreviewCharacters = 8_000
     static let defaultPrompt = """
@@ -72,6 +73,7 @@ private struct NativeResponse: Encodable {
 @main
 struct ImageOCRHost {
     static func main() async {
+        Diagnostics.log("launch args=\(CommandLine.arguments.dropFirst().joined(separator: " "))")
         let arguments = Array(CommandLine.arguments.dropFirst())
 
         if arguments.isEmpty {
@@ -91,9 +93,12 @@ struct ImageOCRHost {
         do {
             let requestData = try NativeMessaging.readMessage()
             let request = try JSONDecoder().decode(OCRRequest.self, from: requestData)
+            Diagnostics.log("native request type=\(request.type ?? "nil") bytes=\(requestData.count)")
             let response = try await OCRService().process(request)
             try NativeMessaging.writeMessage(response)
+            Diagnostics.log("native response ok=\(response.ok)")
         } catch {
+            Diagnostics.log("native error=\(error.localizedDescription)")
             let response = NativeResponse(
                 ok: false,
                 textPreview: nil,
@@ -612,5 +617,27 @@ private extension String {
         }
 
         return String(prefix(limit)) + "\n...[truncated]"
+    }
+}
+
+
+private enum Diagnostics {
+    static func log(_ message: String) {
+        let line = "[\(ISO8601DateFormatter().string(from: Date()))] \(message)\n"
+        let url = URL(fileURLWithPath: Config.logPath)
+        do {
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            if FileManager.default.fileExists(atPath: url.path) {
+                let handle = try FileHandle(forWritingTo: url)
+                try handle.seekToEnd()
+                if let data = line.data(using: .utf8) {
+                    try handle.write(contentsOf: data)
+                }
+                try handle.close()
+            } else {
+                try line.write(to: url, atomically: true, encoding: .utf8)
+            }
+        } catch {
+        }
     }
 }

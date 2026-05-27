@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -ne 1 ]]; then
-  echo "Usage: ./scripts/install_native_host.sh <chrome-extension-id>" >&2
+if [[ $# -lt 1 ]]; then
+  echo "Usage: ./scripts/install_native_host.sh <chrome-extension-id> [additional-extension-id...]" >&2
   exit 2
 fi
 
-EXTENSION_ID="$1"
+EXTENSION_IDS=("$@")
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 HOST_NAME="com.mocchicc.visionclip"
 LEGACY_HOST_NAME="com.mocchicc.image_ocr"
@@ -16,11 +16,13 @@ HOST_BINARY="$INSTALL_DIR/image-ocr-host"
 HOST_MANIFEST="$CHROME_HOST_DIR/$HOST_NAME.json"
 LEGACY_HOST_MANIFEST="$CHROME_HOST_DIR/$LEGACY_HOST_NAME.json"
 
-if [[ ! "$EXTENSION_ID" =~ ^[a-p]{32}$ ]]; then
-  echo "Chrome extension ID looks invalid: $EXTENSION_ID" >&2
-  echo "Load extension/ in chrome://extensions first, then copy its ID." >&2
-  exit 2
-fi
+for extension_id in "${EXTENSION_IDS[@]}"; do
+  if [[ ! "$extension_id" =~ ^[a-p]{32}$ ]]; then
+    echo "Chrome extension ID looks invalid: $extension_id" >&2
+    echo "Load extension/ in chrome://extensions first, then copy its ID." >&2
+    exit 2
+  fi
+done
 
 swift build -c release --package-path "$ROOT_DIR/native-host"
 
@@ -28,7 +30,16 @@ mkdir -p "$INSTALL_DIR"
 mkdir -p "$CHROME_HOST_DIR"
 cp "$ROOT_DIR/native-host/.build/release/image-ocr-host" "$HOST_BINARY"
 chmod 755 "$HOST_BINARY"
+xattr -c "$HOST_BINARY" 2>/dev/null || true
 
+ALLOWED_ORIGINS_JSON=""
+for extension_id in "${EXTENSION_IDS[@]}"; do
+  origin="chrome-extension://$extension_id/"
+  if [[ -n "$ALLOWED_ORIGINS_JSON" ]]; then
+    ALLOWED_ORIGINS_JSON+=$',\n'
+  fi
+  ALLOWED_ORIGINS_JSON+="    \"$origin\""
+done
 for manifest in "$HOST_MANIFEST" "$LEGACY_HOST_MANIFEST"; do
   name="$HOST_NAME"
   if [[ "$manifest" == "$LEGACY_HOST_MANIFEST" ]]; then
@@ -42,7 +53,7 @@ for manifest in "$HOST_MANIFEST" "$LEGACY_HOST_MANIFEST"; do
   "path": "$HOST_BINARY",
   "type": "stdio",
   "allowed_origins": [
-    "chrome-extension://$EXTENSION_ID/"
+$ALLOWED_ORIGINS_JSON
   ]
 }
 JSON
