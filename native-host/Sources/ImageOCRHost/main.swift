@@ -60,12 +60,19 @@ private struct OCRRequest: Decodable {
     let apiKey: String?
 }
 
+private struct TokenUsage: Encodable {
+    let inputTokens: Int?
+    let outputTokens: Int?
+    let totalTokens: Int?
+}
+
 private struct NativeResponse: Encodable {
     let ok: Bool
     let textPreview: String?
     let copied: Bool?
     let model: String?
     let error: String?
+    var usage: TokenUsage? = nil
     var keyIsSet: Bool? = nil
     var version: String? = nil
 }
@@ -239,21 +246,22 @@ private final class OCRService {
             imageDataUrl: request.imageDataUrl
         )
 
-        let text = try await OpenAIClient(apiKey: apiKey).extractText(
+        let result = try await OpenAIClient(apiKey: apiKey).extractText(
             imageDataURL: imageDataURL,
             model: model,
             prompt: prompt,
             detail: detail
         )
 
-        await Clipboard.copy(text)
+        await Clipboard.copy(result.text)
 
         return NativeResponse(
             ok: true,
-            textPreview: text.preview(limit: Config.maxNativeResponsePreviewCharacters),
+            textPreview: result.text.preview(limit: Config.maxNativeResponsePreviewCharacters),
             copied: true,
             model: model,
-            error: nil
+            error: nil,
+            usage: result.usage
         )
     }
 }
@@ -491,6 +499,11 @@ private enum ImageInputLoader {
     }
 }
 
+private struct OCRResult {
+    let text: String
+    let usage: TokenUsage?
+}
+
 private final class OpenAIClient {
     private let apiKey: String
 
@@ -498,7 +511,7 @@ private final class OpenAIClient {
         self.apiKey = apiKey
     }
 
-    func extractText(imageDataURL: String, model: String, prompt: String, detail: String) async throws -> String {
+    func extractText(imageDataURL: String, model: String, prompt: String, detail: String) async throws -> OCRResult {
         var request = URLRequest(url: URL(string: "https://api.openai.com/v1/responses")!)
         request.httpMethod = "POST"
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
@@ -536,7 +549,10 @@ private final class OpenAIClient {
             throw HostError.openAIError(Self.extractAPIError(from: data) ?? "OpenAI API returned HTTP \(httpResponse.statusCode).")
         }
 
-        return try Self.extractOutputText(from: data)
+        return OCRResult(
+            text: try Self.extractOutputText(from: data),
+            usage: Self.extractUsage(from: data)
+        )
     }
 
     private static func extractOutputText(from data: Data) throws -> String {
@@ -569,6 +585,49 @@ private final class OpenAIClient {
         }
 
         return text
+    }
+
+    private static func extractUsage(from data: Data) -> TokenUsage? {
+        guard
+            let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let usage = root["usage"] as? [String: Any]
+        else {
+            return nil
+        }
+
+        let inputTokens = intValue(usage["input_tokens"])
+        let outputTokens = intValue(usage["output_tokens"])
+        let totalTokens = intValue(usage["total_tokens"]) ?? summedTokens(inputTokens, outputTokens)
+        guard inputTokens != nil || outputTokens != nil || totalTokens != nil else {
+            return nil
+        }
+
+        return TokenUsage(
+            inputTokens: inputTokens,
+            outputTokens: outputTokens,
+            totalTokens: totalTokens
+        )
+    }
+
+    private static func summedTokens(_ inputTokens: Int?, _ outputTokens: Int?) -> Int? {
+        guard let inputTokens, let outputTokens else {
+            return nil
+        }
+
+        return inputTokens + outputTokens
+    }
+
+    private static func intValue(_ value: Any?) -> Int? {
+        switch value {
+        case let value as Int:
+            return value
+        case let value as NSNumber:
+            return value.intValue
+        case let value as String:
+            return Int(value)
+        default:
+            return nil
+        }
     }
 
     private static func extractAPIError(from data: Data) -> String? {

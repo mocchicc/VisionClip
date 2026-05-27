@@ -109,6 +109,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       imageUrl: payload.imageUrl,
       pageUrl: info.pageUrl,
       model: response.model,
+      usage: response.usage,
       copied: response.copied === true,
       createdAt: finishedAt
     });
@@ -214,6 +215,7 @@ async function processRegionSelection(message, sender) {
       imageUrl: null,
       pageUrl: message.pageUrl || tab.url,
       model: response.model,
+      usage: response.usage,
       copied: response.copied === true,
       createdAt: finishedAt
     });

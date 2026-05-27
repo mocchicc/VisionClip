@@ -6,11 +6,18 @@ const historyRoot = document.getElementById("history");
 const refreshButton = document.getElementById("refresh");
 const settingsButton = document.getElementById("settings");
 const regionCaptureButton = document.getElementById("region-capture");
+const samplesButton = document.getElementById("samples");
 
 refreshButton.addEventListener("click", loadDashboard);
 settingsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
 regionCaptureButton.addEventListener("click", startRegionOCR);
+samplesButton.addEventListener("click", openSamples);
 document.addEventListener("DOMContentLoaded", loadDashboard);
+
+function openSamples() {
+  chrome.tabs.create({ url: chrome.runtime.getURL("samples.html") });
+  window.close();
+}
 
 async function startRegionOCR() {
   regionCaptureButton.disabled = true;
@@ -130,6 +137,14 @@ function renderHistory(history) {
 
     title.append(label, actions);
     element.append(title, message);
+
+    const usage = formatUsage(item.usage);
+    if (usage) {
+      const usageMeta = document.createElement("div");
+      usageMeta.className = "item-usage";
+      usageMeta.textContent = usage;
+      element.appendChild(usageMeta);
+    }
     historyRoot.appendChild(element);
   }
 }
@@ -152,6 +167,33 @@ function classForState(state) {
     case "cancelled": return "";
     default: return "";
   }
+}
+
+function formatUsage(usage) {
+  if (!usage) {
+    return "";
+  }
+
+  const total = usage.totalTokens;
+  const input = usage.inputTokens;
+  const output = usage.outputTokens;
+  if (total == null && input == null && output == null) {
+    return "";
+  }
+
+  const parts = [];
+  if (total != null) {
+    parts.push(`${total.toLocaleString()} tokens`);
+  }
+  if (input != null || output != null) {
+    parts.push(`in ${formatTokenCount(input)} / out ${formatTokenCount(output)}`);
+  }
+
+  return "usage: " + parts.join(" · ");
+}
+
+function formatTokenCount(value) {
+  return value == null ? "-" : value.toLocaleString();
 }
 
 function formatTime(value) {
