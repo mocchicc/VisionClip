@@ -44,6 +44,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message?.type === "ocr_sample_image") {
+    processSampleImageOCR(message)
+      .then(sendResponse)
+      .catch((error) => sendResponse({
+        ok: false,
+        error: error?.message || String(error)
+      }));
+    return true;
+  }
+
   if (message?.type === "region_ocr_selected") {
     processRegionSelection(message, sender)
       .then(sendResponse)
@@ -142,6 +152,13 @@ async function startRegionOCR() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id || tab.windowId == null) {
     throw new Error("OCRするタブを見つけられませんでした。");
+  }
+
+  if (isSamplesPage(tab.url)) {
+    await chrome.tabs.update(tab.id, {
+      url: chrome.runtime.getURL(`samples.html#region-ocr-${Date.now()}`)
+    });
+    return { ok: true };
   }
 
   const startedAt = Date.now();
@@ -244,6 +261,87 @@ async function processRegionSelection(message, sender) {
   } finally {
     setTimeout(() => chrome.action.setBadgeText({ text: "" }), 3500);
   }
+}
+
+async function processSampleImageOCR(message) {
+  const startedAt = Date.now();
+  const title = message.title || "OCRサンプル";
+  const pageUrl = message.pageUrl || chrome.runtime.getURL("samples.html");
+
+  await setBadge("...", "#4f46e5");
+  await saveCurrentStatus({
+    state: "running",
+    title: "サンプルOCR処理中",
+    message: title,
+    startedAt,
+    updatedAt: startedAt
+  });
+
+  try {
+    const response = await sendNativeMessage({
+      type: "ocr_image",
+      imageDataUrl: message.imageDataUrl,
+      pageUrl,
+      tabTitle: title,
+      model: await getSelectedModel()
+    });
+
+    if (!response?.ok) {
+      throw new Error(response?.error || "OCR failed.");
+    }
+
+    const finishedAt = Date.now();
+    await setBadge("OK", "#15803d");
+    await saveCurrentStatus({
+      state: "success",
+      title: "サンプルOCR成功",
+      message: "サンプル画像の抽出テキストをクリップボードにコピーしました。",
+      updatedAt: finishedAt
+    });
+    await addHistory({
+      state: "success",
+      title: `${title}（サンプル）`,
+      message: response.textPreview || "抽出テキストをコピーしました。",
+      imageUrl: null,
+      pageUrl,
+      model: response.model,
+      usage: response.usage,
+      copied: response.copied === true,
+      createdAt: finishedAt
+    });
+    return {
+      ok: true,
+      textPreview: response.textPreview,
+      copied: response.copied === true,
+      model: response.model,
+      usage: response.usage
+    };
+  } catch (error) {
+    const finishedAt = Date.now();
+    const errorMessage = error?.message || String(error);
+    await setBadge("ERR", "#b91c1c");
+    await saveCurrentStatus({
+      state: "error",
+      title: "サンプルOCR失敗",
+      message: errorMessage,
+      updatedAt: finishedAt
+    });
+    await addHistory({
+      state: "error",
+      title: `${title}（サンプル）`,
+      message: errorMessage,
+      imageUrl: null,
+      pageUrl,
+      createdAt: finishedAt
+    });
+    throw error;
+  } finally {
+    setTimeout(() => chrome.action.setBadgeText({ text: "" }), 3500);
+  }
+}
+
+function isSamplesPage(url) {
+  return typeof url === "string" && url.startsWith(chrome.runtime.getURL("samples.html"));
 }
 
 async function getDashboard() {
