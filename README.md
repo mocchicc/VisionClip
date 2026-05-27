@@ -119,6 +119,14 @@ Chrome右上の拡張ボタンからpopupを開くと、次を確認できます
 
 成功した履歴には `コピー` ボタンが表示され、抽出済みテキストをもう一度クリップボードへコピーできます。
 
+## OCRサンプル画像
+
+動作確認用のサンプル画像を `samples/` に置いています。日本語と英語が混ざったUI、レシート、ラベル、ホワイトボード風の画像で、右クリックOCRと範囲OCRを試せます。
+
+- `samples/ocr-sample-01-dashboard.png`
+- `samples/ocr-sample-02-receipts-labels.png`
+- `samples/ocr-sample-03-whiteboard-notes.png`
+
 ## うまく動かないとき
 
 ### 右クリックメニューやpopupが更新されない
