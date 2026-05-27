@@ -9,22 +9,38 @@ document.addEventListener(
     const imageUrl = image.currentSrc || image.src;
     const imageDataUrl = await tryCanvasCapture(image);
 
-    chrome.runtime.sendMessage({
+    sendRuntimeMessageSafely({
       type: "remember_context_image",
       imageUrl,
       imageDataUrl
-    }).catch(() => {});
+    });
   },
   true
 );
 
-chrome.runtime.onMessage.addListener((message) => {
-  if (message?.type !== "show_ocr_toast") {
-    return;
-  }
+try {
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message?.type !== "show_ocr_toast") {
+      return;
+    }
 
-  showOCRToast(message.title, message.message, message.level);
-});
+    showOCRToast(message.title, message.message, message.level);
+  });
+} catch {
+  // The old content script can outlive an extension reload on the current page.
+}
+
+function sendRuntimeMessageSafely(message) {
+  try {
+    if (!chrome?.runtime?.id) {
+      return;
+    }
+
+    chrome.runtime.sendMessage(message).catch(() => {});
+  } catch {
+    // Ignore stale content scripts after the extension is reloaded.
+  }
+}
 
 async function tryCanvasCapture(image) {
   const src = image.currentSrc || image.src || "";
