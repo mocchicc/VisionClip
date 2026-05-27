@@ -40,15 +40,11 @@ cd "/Users/mocchicc/Documents/VisionClip"
 
 ### 3. OpenAI APIキーを登録する
 
-次を実行します。
+Chrome右上の拡張ボタンから `VisionClip - Image OCR to Clipboard` を開き、`設定` を押します。
 
-```sh
-"$HOME/Library/Application Support/VisionClip/image-ocr-host" set-key
-```
+設定画面でOpenAI APIキーを貼り付けて、`Keychainに保存` を押します。APIキーは保存時だけMac側ホストに渡され、MacのKeychainに保存されます。Chrome拡張には保存されません。
 
-`OpenAI API key:` と表示されたら、自分のOpenAI APIキーを貼り付けてEnterを押します。入力中は画面に表示されませんが、それで正常です。
-
-もし入力がうまく確定できない場合は、APIキーをコピーした状態で次を実行してください。
+CLIで登録したい場合は、APIキーをコピーした状態で次を実行することもできます。
 
 ```sh
 "$HOME/Library/Application Support/VisionClip/image-ocr-host" set-key-clipboard
@@ -82,11 +78,7 @@ Chrome拡張が読み込まれているか確認してください。
 
 ### もう一度APIキーを入れ直したい
 
-```sh
-"$HOME/Library/Application Support/VisionClip/image-ocr-host" set-key
-```
-
-同じコマンドで上書きできます。
+Chrome右上の拡張ボタンから `VisionClip - Image OCR to Clipboard` を開き、`設定` を押して新しいAPIキーを保存してください。
 
 ### テストで画像URLを直接OCRしたい
 

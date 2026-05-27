@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisionClip Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>VisionClip</h1>
+      <p>OpenAI APIキーをMacのKeychainに保存します。Chrome拡張には保存しません。</p>
+    </header>
+    <section>
+      <label for="api-key">OpenAI APIキー</label>
+      <div class="input-row">
+        <input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-...">
+        <button id="toggle" type="button">表示</button>
+      </div>
+      <div class="actions">
+        <button id="save" type="button" class="primary">Keychainに保存</button>
+        <button id="check" type="button">状態を確認</button>
+      </div>
+      <p id="message" class="message">APIキーは保存時だけMac側ホストへ渡されます。</p>
+    </section>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

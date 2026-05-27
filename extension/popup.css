@@ -37,6 +37,11 @@ header p {
   margin-top: 2px;
 }
 
+.header-actions {
+  display: flex;
+  gap: 6px;
+}
+
 button {
   border: 1px solid #cbd5e1;
   border-radius: 7px;

@@ -56,6 +56,7 @@ private struct OCRRequest: Decodable {
     let model: String?
     let prompt: String?
     let detail: String?
+    let apiKey: String?
 }
 
 private struct NativeResponse: Encodable {
@@ -141,7 +142,8 @@ struct ImageOCRHost {
                 tabTitle: nil,
                 model: arguments.count >= 3 ? arguments[2] : nil,
                 prompt: nil,
-                detail: nil
+                detail: nil,
+                apiKey: nil
             )
             let response = try await OCRService().process(request)
             print(response.textPreview ?? "")
@@ -202,6 +204,23 @@ private final class OCRService {
             )
         }
 
+        if request.type == "set_api_key" {
+            guard let apiKey = request.apiKey?.nilIfBlank else {
+                throw HostError.missingAPIKey
+            }
+
+            try KeychainStore.saveAPIKey(apiKey)
+            return NativeResponse(
+                ok: true,
+                textPreview: nil,
+                copied: nil,
+                model: Config.defaultModel,
+                error: nil,
+                keyIsSet: true,
+                version: "0.1.0"
+            )
+        }
+
         guard request.type == nil || request.type == "ocr_image" else {
             throw HostError.invalidNativeMessage
         }
@@ -241,8 +260,8 @@ private enum NativeMessaging {
             throw HostError.invalidNativeMessage
         }
 
-        let length = lengthData.withUnsafeBytes { pointer in
-            pointer.load(as: UInt32.self).littleEndian
+        let length = lengthData.enumerated().reduce(UInt32(0)) { partial, item in
+            partial | (UInt32(item.element) << UInt32(item.offset * 8))
         }
 
         guard length > 0 && length < UInt32.max else {

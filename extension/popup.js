@@ -3,8 +3,10 @@ const runStatus = document.getElementById("run-status");
 const statusMessage = document.getElementById("status-message");
 const historyRoot = document.getElementById("history");
 const refreshButton = document.getElementById("refresh");
+const settingsButton = document.getElementById("settings");
 
 refreshButton.addEventListener("click", loadDashboard);
+settingsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
 document.addEventListener("DOMContentLoaded", loadDashboard);
 
 async function loadDashboard() {
