@@ -190,4 +190,4 @@ APIキーも消したい場合は、先に次を実行します。
 - Chrome拡張は、右クリックメニューまたは範囲選択UIからMac側に画像情報を渡します。
 - Mac側のSwiftプログラムがOpenAI Responses APIを呼び、結果をクリップボードへコピーします。
 - Native Messagingの設定は `scripts/install_native_host.sh` が作成します。
-- デフォルトモデルは `gpt-4.1-mini` です。
+- デフォルトモデルは `gpt-5.4-nano` です。

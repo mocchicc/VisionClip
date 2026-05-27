@@ -1,7 +1,7 @@
 const HOST_NAMES = ["com.mocchicc.visionclip", "com.mocchicc.image_ocr"];
 const MENU_ID = "ocr-image";
 const MODEL_STORAGE_KEY = "ocrModel";
-const DEFAULT_MODEL = "gpt-4.1-mini";
+const DEFAULT_MODEL = "gpt-5.4-nano";
 const MAX_INLINE_IMAGE_BYTES = 12 * 1024 * 1024;
 const HISTORY_LIMIT = 5;
 const recentContextImages = new Map();

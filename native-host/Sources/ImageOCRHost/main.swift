@@ -8,7 +8,7 @@ private enum Config {
     static let keychainService = "com.mocchicc.visionclip.openai"
     static let legacyKeychainService = "com.mocchicc.image_ocr.openai"
     static let keychainAccount = "default"
-    static let defaultModel = "gpt-4.1-mini"
+    static let defaultModel = "gpt-5.4-nano"
     static let defaultDetail = "high"
     static let logPath = NSHomeDirectory() + "/Library/Logs/VisionClip/native-host.log"
     static let maxImageBytes = 50 * 1024 * 1024

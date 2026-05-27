@@ -54,7 +54,7 @@ function renderDashboard(dashboard) {
   const nativeStatus = dashboard?.nativeStatus || {};
   const currentStatus = dashboard?.currentStatus;
 
-  modelStatus.textContent = dashboard?.selectedModel || "gpt-4.1-mini";
+  modelStatus.textContent = dashboard?.selectedModel || "gpt-5.4-nano";
   modelStatus.className = "";
 
   if (nativeStatus.ok && nativeStatus.keyIsSet) {
