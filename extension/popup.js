@@ -79,15 +79,30 @@ function renderHistory(history) {
     const label = document.createElement("span");
     label.textContent = labelForState(item.state) + " - " + (item.title || "画像OCR");
 
+    const actions = document.createElement("div");
+    actions.className = "item-actions";
+
     const time = document.createElement("span");
     time.className = "item-time";
     time.textContent = formatTime(item.createdAt);
+    actions.appendChild(time);
+
+    if (item.state === "success" && item.message) {
+      const copyButton = document.createElement("button");
+      copyButton.className = "copy-button";
+      copyButton.type = "button";
+      copyButton.textContent = "コピー";
+      copyButton.addEventListener("click", async () => {
+        await copyHistoryText(item.message, copyButton);
+      });
+      actions.appendChild(copyButton);
+    }
 
     const message = document.createElement("div");
     message.className = "item-message";
     message.textContent = item.message || "";
 
-    title.append(label, time);
+    title.append(label, actions);
     element.append(title, message);
     historyRoot.appendChild(element);
   }
@@ -120,4 +135,46 @@ function formatTime(value) {
     hour: "2-digit",
     minute: "2-digit"
   }).format(new Date(value));
+}
+
+
+async function copyHistoryText(text, button) {
+  const originalLabel = button.textContent;
+  try {
+    await writeClipboardText(text);
+    button.textContent = "済";
+    runStatus.textContent = "成功";
+    runStatus.className = "ok";
+    statusMessage.textContent = "履歴の抽出テキストをクリップボードにコピーしました。";
+  } catch (error) {
+    button.textContent = "失敗";
+    runStatus.textContent = "失敗";
+    runStatus.className = "bad";
+    statusMessage.textContent = error?.message || String(error);
+  } finally {
+    setTimeout(() => {
+      button.textContent = originalLabel;
+    }, 1200);
+  }
+}
+
+async function writeClipboardText(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  const copied = document.execCommand("copy");
+  textarea.remove();
+
+  if (!copied) {
+    throw new Error("クリップボードにコピーできませんでした。");
+  }
 }

@@ -130,10 +130,23 @@ h2 {
   margin-bottom: 5px;
 }
 
+.item-actions {
+  align-items: center;
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+
 .item-time {
   color: #64748b;
   flex: none;
   font-weight: 500;
+}
+
+.copy-button {
+  font-size: 11px;
+  line-height: 1;
+  padding: 5px 7px;
 }
 
 .item-message {
