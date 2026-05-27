@@ -1,14 +1,38 @@
 const HOST_NAMES = ["com.mocchicc.visionclip", "com.mocchicc.image_ocr"];
+const MODEL_STORAGE_KEY = "ocrModel";
+const DEFAULT_MODEL = "gpt-4.1-mini";
 const input = document.getElementById("api-key");
+const modelSelect = document.getElementById("model");
 const saveButton = document.getElementById("save");
+const saveModelButton = document.getElementById("save-model");
 const checkButton = document.getElementById("check");
 const toggleButton = document.getElementById("toggle");
 const message = document.getElementById("message");
+const modelMessage = document.getElementById("model-message");
 
 saveButton.addEventListener("click", saveAPIKey);
+saveModelButton.addEventListener("click", saveModel);
 checkButton.addEventListener("click", checkStatus);
 toggleButton.addEventListener("click", toggleVisibility);
-document.addEventListener("DOMContentLoaded", checkStatus);
+document.addEventListener("DOMContentLoaded", initOptions);
+
+async function initOptions() {
+  await Promise.all([
+    loadModel(),
+    checkStatus()
+  ]);
+}
+
+async function loadModel() {
+  const stored = await chrome.storage.local.get(MODEL_STORAGE_KEY);
+  modelSelect.value = stored[MODEL_STORAGE_KEY] || DEFAULT_MODEL;
+}
+
+async function saveModel() {
+  const model = modelSelect.value || DEFAULT_MODEL;
+  await chrome.storage.local.set({ [MODEL_STORAGE_KEY]: model });
+  showModelMessage(`${model} を保存しました。`, "ok");
+}
 
 async function saveAPIKey() {
   const apiKey = input.value.trim();
@@ -54,6 +78,11 @@ function toggleVisibility() {
 function showMessage(text, className) {
   message.textContent = text;
   message.className = "message " + className;
+}
+
+function showModelMessage(text, className) {
+  modelMessage.textContent = text;
+  modelMessage.className = "message " + className;
 }
 
 async function sendNativeMessage(payload) {

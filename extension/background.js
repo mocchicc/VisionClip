@@ -1,5 +1,7 @@
 const HOST_NAMES = ["com.mocchicc.visionclip", "com.mocchicc.image_ocr"];
 const MENU_ID = "ocr-image";
+const MODEL_STORAGE_KEY = "ocrModel";
+const DEFAULT_MODEL = "gpt-4.1-mini";
 const MAX_INLINE_IMAGE_BYTES = 12 * 1024 * 1024;
 const HISTORY_LIMIT = 5;
 const recentContextImages = new Map();
@@ -189,7 +191,8 @@ async function processRegionSelection(message, sender) {
       type: "ocr_image",
       imageDataUrl: message.imageDataUrl,
       pageUrl: message.pageUrl || tab.url,
-      tabTitle: tab.title
+      tabTitle: tab.title,
+      model: await getSelectedModel()
     });
 
     if (!response?.ok) {
@@ -244,12 +247,13 @@ async function processRegionSelection(message, sender) {
 async function getDashboard() {
   const [nativeStatus, stored] = await Promise.all([
     getNativeStatus(),
-    chrome.storage.local.get(["currentStatus", "history"])
+    chrome.storage.local.get(["currentStatus", "history", MODEL_STORAGE_KEY])
   ]);
 
   return {
     ok: true,
     nativeStatus,
+    selectedModel: stored[MODEL_STORAGE_KEY] || DEFAULT_MODEL,
     currentStatus: stored.currentStatus || null,
     history: stored.history || []
   };
@@ -279,6 +283,11 @@ async function addHistory(item) {
   });
 }
 
+async function getSelectedModel() {
+  const stored = await chrome.storage.local.get(MODEL_STORAGE_KEY);
+  return stored[MODEL_STORAGE_KEY] || DEFAULT_MODEL;
+}
+
 async function buildOCRPayload(info, tab) {
   const srcUrl = info.srcUrl || "";
   const remembered = getRecentContextImage(tab?.id, srcUrl);
@@ -287,7 +296,8 @@ async function buildOCRPayload(info, tab) {
     imageUrl: remembered?.imageUrl || srcUrl,
     imageDataUrl: remembered?.imageDataUrl,
     pageUrl: info.pageUrl,
-    tabTitle: tab?.title
+    tabTitle: tab?.title,
+    model: await getSelectedModel()
   };
 
   if (!payload.imageDataUrl) {

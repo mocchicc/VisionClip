@@ -24,6 +24,18 @@
       </div>
       <p id="message" class="message">APIキーは保存時だけMac側ホストへ渡されます。</p>
     </section>
+    <section>
+      <label for="model">OCRモデル</label>
+      <select id="model">
+        <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+        <option value="gpt-5.4-nano">gpt-5.4-nano</option>
+        <option value="gpt-5.4-mini">gpt-5.4-mini</option>
+      </select>
+      <div class="actions">
+        <button id="save-model" type="button" class="primary">モデルを保存</button>
+      </div>
+      <p id="model-message" class="message">保存したモデルは右クリックOCRと範囲OCRで使われます。</p>
+    </section>
   </main>
   <script src="options.js"></script>
 </body>

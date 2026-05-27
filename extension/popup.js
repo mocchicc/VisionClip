@@ -1,4 +1,5 @@
 const keyStatus = document.getElementById("key-status");
+const modelStatus = document.getElementById("model-status");
 const runStatus = document.getElementById("run-status");
 const statusMessage = document.getElementById("status-message");
 const historyRoot = document.getElementById("history");
@@ -30,6 +31,7 @@ async function startRegionOCR() {
 
 async function loadDashboard() {
   keyStatus.textContent = "確認中...";
+  modelStatus.textContent = "確認中...";
   runStatus.textContent = "確認中...";
   statusMessage.textContent = "";
 
@@ -39,6 +41,8 @@ async function loadDashboard() {
   } catch (error) {
     keyStatus.textContent = "確認できません";
     keyStatus.className = "bad";
+    modelStatus.textContent = "確認できません";
+    modelStatus.className = "bad";
     runStatus.textContent = "拡張エラー";
     runStatus.className = "bad";
     statusMessage.textContent = error?.message || String(error);
@@ -49,6 +53,9 @@ async function loadDashboard() {
 function renderDashboard(dashboard) {
   const nativeStatus = dashboard?.nativeStatus || {};
   const currentStatus = dashboard?.currentStatus;
+
+  modelStatus.textContent = dashboard?.selectedModel || "gpt-4.1-mini";
+  modelStatus.className = "";
 
   if (nativeStatus.ok && nativeStatus.keyIsSet) {
     keyStatus.textContent = "セット済み";
