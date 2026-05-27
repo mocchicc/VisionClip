@@ -1,4 +1,4 @@
-const HOST_NAME = "com.mocchicc.visionclip";
+const HOST_NAMES = ["com.mocchicc.visionclip", "com.mocchicc.image_ocr"];
 const MENU_ID = "ocr-image";
 const MAX_INLINE_IMAGE_BYTES = 12 * 1024 * 1024;
 const HISTORY_LIMIT = 5;
@@ -211,9 +211,22 @@ function blobToDataUrl(blob) {
   });
 }
 
-function sendNativeMessage(payload) {
+async function sendNativeMessage(payload) {
+  let lastError = null;
+  for (const hostName of HOST_NAMES) {
+    try {
+      return await sendNativeMessageToHost(hostName, payload);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error("Native messaging host is not available.");
+}
+
+function sendNativeMessageToHost(hostName, payload) {
   return new Promise((resolve, reject) => {
-    chrome.runtime.sendNativeMessage(HOST_NAME, payload, (response) => {
+    chrome.runtime.sendNativeMessage(hostName, payload, (response) => {
       if (chrome.runtime.lastError) {
         reject(new Error(chrome.runtime.lastError.message));
         return;

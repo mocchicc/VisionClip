@@ -1,4 +1,4 @@
-const HOST_NAME = "com.mocchicc.visionclip";
+const HOST_NAMES = ["com.mocchicc.visionclip", "com.mocchicc.image_ocr"];
 const input = document.getElementById("api-key");
 const saveButton = document.getElementById("save");
 const checkButton = document.getElementById("check");
@@ -56,9 +56,22 @@ function showMessage(text, className) {
   message.className = "message " + className;
 }
 
-function sendNativeMessage(payload) {
+async function sendNativeMessage(payload) {
+  let lastError = null;
+  for (const hostName of HOST_NAMES) {
+    try {
+      return await sendNativeMessageToHost(hostName, payload);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error("Native messaging host is not available.");
+}
+
+function sendNativeMessageToHost(hostName, payload) {
   return new Promise((resolve, reject) => {
-    chrome.runtime.sendNativeMessage(HOST_NAME, payload, (response) => {
+    chrome.runtime.sendNativeMessage(hostName, payload, (response) => {
       if (chrome.runtime.lastError) {
         reject(new Error(chrome.runtime.lastError.message));
         return;
