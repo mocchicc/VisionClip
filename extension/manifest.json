@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Image OCR to Clipboard",
+  "name": "VisionClip - Image OCR to Clipboard",
   "version": "0.1.0",
   "description": "Right-click an image, extract text with a multimodal model, and copy the result to the macOS clipboard.",
   "permissions": [
@@ -26,6 +26,6 @@
     }
   ],
   "action": {
-    "default_title": "Image OCR to Clipboard"
+    "default_title": "VisionClip - Image OCR to Clipboard"
   }
 }

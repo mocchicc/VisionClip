@@ -1,6 +1,6 @@
-# Image OCR to Clipboard
+# VisionClip - Image OCR to Clipboard
 
-Chromeで画像を右クリックして、画像の中の文字を読み取り、結果をMacのクリップボードにコピーするツールです。
+VisionClipは、Chromeで画像を右クリックして、画像の中の文字を読み取り、結果をMacのクリップボードにコピーするツールです。
 
 たとえば、ブラウザ上の画像を右クリックして「この画像をOCRする」を押すと、数秒後に読み取った文字がコピーされた状態になります。そのままメモ帳やSlackなどに貼り付けできます。
 
@@ -62,7 +62,7 @@ cd "/Users/mocchicc/Documents/VisionClip"
 
 Chrome拡張が読み込まれているか確認してください。
 
-`chrome://extensions` を開いて、`Image OCR to Clipboard` がONになっていればOKです。
+`chrome://extensions` を開いて、`VisionClip - Image OCR to Clipboard` がONになっていればOKです。
 
 ### APIキーが登録されているか確認したい
 
