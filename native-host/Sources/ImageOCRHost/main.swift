@@ -3,8 +3,8 @@ import Foundation
 import Darwin
 
 private enum Config {
-    static let hostName = "com.mocchicc.image_ocr"
-    static let keychainService = "com.mocchicc.image_ocr.openai"
+    static let hostName = "com.mocchicc.visionclip"
+    static let keychainService = "com.mocchicc.visionclip.openai"
     static let keychainAccount = "default"
     static let defaultModel = "gpt-4.1-mini"
     static let defaultDetail = "high"
@@ -105,11 +105,18 @@ struct ImageOCRHost {
         switch arguments[0] {
         case "set-key":
             let key = try readSecret(prompt: "OpenAI API key: ")
-            guard !key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            guard let key = key.nilIfBlank else {
                 throw HostError.missingAPIKey
             }
             try KeychainStore.saveAPIKey(key)
             print("Saved OpenAI API key to Keychain.")
+
+        case "set-key-clipboard":
+            guard let key = await Clipboard.readString()?.nilIfBlank else {
+                throw HostError.missingAPIKey
+            }
+            try KeychainStore.saveAPIKey(key)
+            print("Saved OpenAI API key from clipboard to Keychain.")
 
         case "check-key":
             _ = try KeychainStore.readAPIKey()
@@ -150,6 +157,7 @@ struct ImageOCRHost {
         print("""
         Usage:
           image-ocr-host set-key
+          image-ocr-host set-key-clipboard
           image-ocr-host check-key
           image-ocr-host clear-key
           image-ocr-host ocr-url <image-url> [model]
@@ -279,9 +287,8 @@ private enum KeychainStore {
                 "-U",
                 "-s", Config.keychainService,
                 "-a", Config.keychainAccount,
-                "-w"
-            ],
-            stdin: Data((key + "\n").utf8)
+                "-w", key
+            ]
         )
 
         guard result.status == 0 else {
@@ -377,7 +384,7 @@ private enum ImageInputLoader {
         }
 
         var urlRequest = URLRequest(url: url)
-        urlRequest.setValue("Mozilla/5.0 ImageOCRToClipboard/0.1", forHTTPHeaderField: "User-Agent")
+        urlRequest.setValue("Mozilla/5.0 VisionClip/0.1", forHTTPHeaderField: "User-Agent")
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
         if let httpResponse = response as? HTTPURLResponse, !(200..<300).contains(httpResponse.statusCode) {
@@ -527,6 +534,12 @@ private final class OpenAIClient {
 }
 
 private enum Clipboard {
+    
+    @MainActor
+    static func readString() -> String? {
+        NSPasteboard.general.string(forType: .string)
+    }
+
     @MainActor
     static func copy(_ text: String) {
         NSPasteboard.general.clearContents()

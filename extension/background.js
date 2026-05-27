@@ -1,4 +1,4 @@
-const HOST_NAME = "com.mocchicc.image_ocr";
+const HOST_NAME = "com.mocchicc.visionclip";
 const MENU_ID = "ocr-image";
 const MAX_INLINE_IMAGE_BYTES = 12 * 1024 * 1024;
 const recentContextImages = new Map();

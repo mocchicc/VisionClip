@@ -43,10 +43,16 @@ cd "/Users/mocchicc/Documents/VisionClip"
 次を実行します。
 
 ```sh
-"$HOME/Library/Application Support/ImageOCRToClipboard/image-ocr-host" set-key
+"$HOME/Library/Application Support/VisionClip/image-ocr-host" set-key
 ```
 
 `OpenAI API key:` と表示されたら、自分のOpenAI APIキーを貼り付けてEnterを押します。入力中は画面に表示されませんが、それで正常です。
+
+もし入力がうまく確定できない場合は、APIキーをコピーした状態で次を実行してください。
+
+```sh
+"$HOME/Library/Application Support/VisionClip/image-ocr-host" set-key-clipboard
+```
 
 ## 使い方
 
@@ -67,7 +73,7 @@ Chrome拡張が読み込まれているか確認してください。
 ### APIキーが登録されているか確認したい
 
 ```sh
-"$HOME/Library/Application Support/ImageOCRToClipboard/image-ocr-host" check-key
+"$HOME/Library/Application Support/VisionClip/image-ocr-host" check-key
 ```
 
 `OpenAI API key is set.` と出れば登録されています。
@@ -75,7 +81,7 @@ Chrome拡張が読み込まれているか確認してください。
 ### もう一度APIキーを入れ直したい
 
 ```sh
-"$HOME/Library/Application Support/ImageOCRToClipboard/image-ocr-host" set-key
+"$HOME/Library/Application Support/VisionClip/image-ocr-host" set-key
 ```
 
 同じコマンドで上書きできます。
@@ -83,7 +89,7 @@ Chrome拡張が読み込まれているか確認してください。
 ### テストで画像URLを直接OCRしたい
 
 ```sh
-"$HOME/Library/Application Support/ImageOCRToClipboard/image-ocr-host" ocr-url "https://example.com/image.png"
+"$HOME/Library/Application Support/VisionClip/image-ocr-host" ocr-url "https://example.com/image.png"
 ```
 
 成功すると、結果が表示され、同時にクリップボードにもコピーされます。
@@ -97,7 +103,7 @@ Chrome拡張が読み込まれているか確認してください。
 APIキーも消したい場合は、先に次を実行します。
 
 ```sh
-"$HOME/Library/Application Support/ImageOCRToClipboard/image-ocr-host" clear-key
+"$HOME/Library/Application Support/VisionClip/image-ocr-host" clear-key
 ```
 
 ## 今の制限

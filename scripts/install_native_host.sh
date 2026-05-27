@@ -8,8 +8,8 @@ fi
 
 EXTENSION_ID="$1"
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-HOST_NAME="com.mocchicc.image_ocr"
-INSTALL_DIR="$HOME/Library/Application Support/ImageOCRToClipboard"
+HOST_NAME="com.mocchicc.visionclip"
+INSTALL_DIR="$HOME/Library/Application Support/VisionClip"
 CHROME_HOST_DIR="$HOME/Library/Application Support/Google/Chrome/NativeMessagingHosts"
 HOST_BINARY="$INSTALL_DIR/image-ocr-host"
 HOST_MANIFEST="$CHROME_HOST_DIR/$HOST_NAME.json"
@@ -30,7 +30,7 @@ chmod 755 "$HOST_BINARY"
 cat > "$HOST_MANIFEST" <<JSON
 {
   "name": "$HOST_NAME",
-  "description": "Image OCR to Clipboard native messaging host",
+  "description": "VisionClip native messaging host",
   "path": "$HOST_BINARY",
   "type": "stdio",
   "allowed_origins": [
