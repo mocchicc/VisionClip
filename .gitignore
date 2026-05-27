@@ -4,4 +4,4 @@
 DerivedData/
 *.xcodeproj
 *.xcworkspace
-
+.codex-session-notes.md
