@@ -25,11 +25,14 @@ for extension_id in "${EXTENSION_IDS[@]}"; do
   fi
 done
 
-swift build -c release --package-path "$ROOT_DIR/native-host"
+BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/visionclip-native-build.XXXXXX")"
+trap 'rm -rf "$BUILD_DIR"' EXIT
+
+swift build -c release --package-path "$ROOT_DIR/native-host" --build-path "$BUILD_DIR"
 
 mkdir -p "$INSTALL_DIR"
 mkdir -p "$CHROME_HOST_DIR"
-cp "$ROOT_DIR/native-host/.build/release/image-ocr-host" "$HOST_BINARY"
+cp "$BUILD_DIR/release/image-ocr-host" "$HOST_BINARY"
 chmod 755 "$HOST_BINARY"
 xattr -c "$HOST_BINARY" 2>/dev/null || true
 
@@ -78,4 +81,3 @@ echo "  $LEGACY_HOST_MANIFEST"
 echo
 echo "Next:"
 echo "  \"$HOST_BINARY\" set-key"
-

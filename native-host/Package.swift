@@ -14,7 +14,8 @@ let package = Package(
         .executableTarget(
             name: "ImageOCRHost",
             linkerSettings: [
-                .linkedFramework("AppKit")
+                .linkedFramework("AppKit"),
+                .linkedFramework("Security")
             ]
         )
     ]

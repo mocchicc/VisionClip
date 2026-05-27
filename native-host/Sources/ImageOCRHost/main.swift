@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import Darwin
+import Security
 
 private enum Config {
     static let hostName = "com.mocchicc.visionclip"
@@ -309,25 +310,23 @@ private enum KeychainStore {
     }
 
     private static func readAPIKey(service: String) throws -> String {
-        let result = try ProcessRunner.run(
-            "/usr/bin/security",
-            arguments: [
-                "find-generic-password",
-                "-s", service,
-                "-a", Config.keychainAccount,
-                "-w"
-            ]
-        )
+        var query = baseQuery(service: service)
+        query[kSecReturnData] = true
+        query[kSecMatchLimit] = kSecMatchLimitOne
 
-        guard result.status != 44 else {
+        var item: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        guard status != errSecItemNotFound else {
             throw HostError.missingAPIKey
         }
-        guard result.status == 0 else {
-            throw HostError.keychainError(result.status, result.stderrText)
+        guard status == errSecSuccess else {
+            throw HostError.keychainError(status, keychainMessage(status))
         }
 
-        let key = result.stdoutText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !key.isEmpty else {
+        guard
+            let data = item as? Data,
+            let key = String(data: data, encoding: .utf8)?.nilIfBlank
+        else {
             throw HostError.missingAPIKey
         }
 
@@ -335,89 +334,50 @@ private enum KeychainStore {
     }
 
     static func saveAPIKey(_ key: String) throws {
-        let result = try ProcessRunner.run(
-            "/usr/bin/security",
-            arguments: [
-                "add-generic-password",
-                "-U",
-                "-s", Config.keychainService,
-                "-a", Config.keychainAccount,
-                "-w", key
-            ]
-        )
+        let data = Data(key.utf8)
+        let attributesToUpdate: [CFString: Any] = [
+            kSecValueData: data
+        ]
 
-        guard result.status == 0 else {
-            throw HostError.keychainError(result.status, result.stderrText)
+        let updateStatus = SecItemUpdate(
+            baseQuery(service: Config.keychainService) as CFDictionary,
+            attributesToUpdate as CFDictionary
+        )
+        if updateStatus == errSecSuccess {
+            return
+        }
+        guard updateStatus == errSecItemNotFound else {
+            throw HostError.keychainError(updateStatus, keychainMessage(updateStatus))
+        }
+
+        var query = baseQuery(service: Config.keychainService)
+        query[kSecValueData] = data
+        let addStatus = SecItemAdd(query as CFDictionary, nil)
+        guard addStatus == errSecSuccess else {
+            throw HostError.keychainError(addStatus, keychainMessage(addStatus))
         }
     }
 
     static func deleteAPIKey() throws {
         let services = [Config.keychainService, Config.legacyKeychainService]
         for service in services {
-            let result = try ProcessRunner.run(
-                "/usr/bin/security",
-                arguments: [
-                    "delete-generic-password",
-                    "-s", service,
-                    "-a", Config.keychainAccount
-                ]
-            )
-
-            guard result.status == 0 || result.status == 44 else {
-                throw HostError.keychainError(result.status, result.stderrText)
+            let status = SecItemDelete(baseQuery(service: service) as CFDictionary)
+            guard status == errSecSuccess || status == errSecItemNotFound else {
+                throw HostError.keychainError(status, keychainMessage(status))
             }
         }
     }
-}
 
-private enum ProcessRunner {
-    struct Result {
-        let status: Int32
-        let stdout: Data
-        let stderr: Data
-
-        var stdoutText: String {
-            String(data: stdout, encoding: .utf8) ?? ""
-        }
-
-        var stderrText: String {
-            String(data: stderr, encoding: .utf8) ?? ""
-        }
+    private static func baseQuery(service: String) -> [CFString: Any] {
+        [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: service,
+            kSecAttrAccount: Config.keychainAccount
+        ]
     }
 
-    static func run(_ executable: String, arguments: [String], stdin: Data? = nil) throws -> Result {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: executable)
-        process.arguments = arguments
-
-        let stdoutPipe = Pipe()
-        let stderrPipe = Pipe()
-        process.standardOutput = stdoutPipe
-        process.standardError = stderrPipe
-
-        let stdinPipe: Pipe?
-        if stdin != nil {
-            let pipe = Pipe()
-            process.standardInput = pipe
-            stdinPipe = pipe
-        } else {
-            stdinPipe = nil
-        }
-
-        try process.run()
-
-        if let stdin, let stdinPipe {
-            stdinPipe.fileHandleForWriting.write(stdin)
-            try? stdinPipe.fileHandleForWriting.close()
-        }
-
-        process.waitUntilExit()
-
-        return Result(
-            status: process.terminationStatus,
-            stdout: stdoutPipe.fileHandleForReading.readDataToEndOfFile(),
-            stderr: stderrPipe.fileHandleForReading.readDataToEndOfFile()
-        )
+    private static func keychainMessage(_ status: OSStatus) -> String {
+        SecCopyErrorMessageString(status, nil) as String? ?? "Unknown Keychain error."
     }
 }
 
@@ -486,7 +446,12 @@ private enum ImageInputLoader {
             throw HostError.unsupportedImage("Inline image data must be a data:image URL.")
         }
 
-        let metadata = dataURL.split(separator: ",", maxSplits: 1).first ?? ""
+        let parts = dataURL.split(separator: ",", maxSplits: 1)
+        guard parts.count == 2 else {
+            throw HostError.unsupportedImage("Inline image data is malformed.")
+        }
+
+        let metadata = parts[0]
         let mimeType = metadata
             .replacingOccurrences(of: "data:", with: "")
             .split(separator: ";", maxSplits: 1)
@@ -495,6 +460,18 @@ private enum ImageInputLoader {
 
         guard isSupportedMimeType(mimeType) else {
             throw HostError.unsupportedImage("Unsupported inline image type: \(mimeType). Use PNG, JPEG, WEBP, or non-animated GIF.")
+        }
+
+        guard metadata.lowercased().contains(";base64") else {
+            throw HostError.unsupportedImage("Inline image data must be base64 encoded.")
+        }
+
+        guard let imageData = Data(base64Encoded: String(parts[1]), options: [.ignoreUnknownCharacters]) else {
+            throw HostError.unsupportedImage("Inline image data is not valid base64.")
+        }
+
+        guard imageData.count <= Config.maxImageBytes else {
+            throw HostError.unsupportedImage("Image is larger than \(Config.maxImageBytes / 1024 / 1024) MB.")
         }
     }
 }
@@ -643,7 +620,6 @@ private final class OpenAIClient {
 }
 
 private enum Clipboard {
-    
     @MainActor
     static func readString() -> String? {
         NSPasteboard.general.string(forType: .string)
