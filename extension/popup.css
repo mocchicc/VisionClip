@@ -57,9 +57,6 @@ button:hover {
 }
 
 .quick-actions {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: 1fr 1fr;
   margin-bottom: 10px;
 }
 
@@ -67,11 +64,6 @@ button:hover {
   background: #111827;
   border-color: #111827;
   color: #ffffff;
-  font-weight: 700;
-  width: 100%;
-}
-
-.secondary-action {
   font-weight: 700;
   width: 100%;
 }

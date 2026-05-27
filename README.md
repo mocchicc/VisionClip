@@ -121,11 +121,11 @@ Chrome右上の拡張ボタンからpopupを開くと、次を確認できます
 
 ## OCRサンプル画像
 
-動作確認用のサンプル画像を `extension/samples/` に置いています。popupの `サンプルを表示` から開けて、サンプルページ内の `範囲OCR` ボタンから選択範囲のOCRを試せます。日本語と英語が混ざったUI、レシート、ラベル、ホワイトボード風の画像です。
+動作確認用のサンプル画像を `samples/` に置いています。通常のChromeページ上で画像を開いた状態で、右クリックOCRや範囲OCRを試すためのテスト素材です。日本語と英語が混ざったUI、レシート、ラベル、ホワイトボード風の画像です。
 
-- `extension/samples/ocr-sample-01-dashboard.png`
-- `extension/samples/ocr-sample-02-receipts-labels.png`
-- `extension/samples/ocr-sample-03-whiteboard-notes.png`
+- `samples/ocr-sample-01-dashboard.png`
+- `samples/ocr-sample-02-receipts-labels.png`
+- `samples/ocr-sample-03-whiteboard-notes.png`
 
 ## うまく動かないとき
 

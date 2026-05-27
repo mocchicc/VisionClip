@@ -6,18 +6,11 @@ const historyRoot = document.getElementById("history");
 const refreshButton = document.getElementById("refresh");
 const settingsButton = document.getElementById("settings");
 const regionCaptureButton = document.getElementById("region-capture");
-const samplesButton = document.getElementById("samples");
 
 refreshButton.addEventListener("click", loadDashboard);
 settingsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
 regionCaptureButton.addEventListener("click", startRegionOCR);
-samplesButton.addEventListener("click", openSamples);
 document.addEventListener("DOMContentLoaded", loadDashboard);
-
-function openSamples() {
-  chrome.tabs.create({ url: chrome.runtime.getURL("samples.html") });
-  window.close();
-}
 
 async function startRegionOCR() {
   regionCaptureButton.disabled = true;
