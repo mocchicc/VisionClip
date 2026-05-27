@@ -19,12 +19,21 @@ document.addEventListener(
 );
 
 try {
-  chrome.runtime.onMessage.addListener((message) => {
-    if (message?.type !== "show_ocr_toast") {
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message?.type === "show_ocr_toast") {
+      showOCRToast(message.title, message.message, message.level);
       return;
     }
 
-    showOCRToast(message.title, message.message, message.level);
+    if (message?.type === "start_region_selection") {
+      startRegionSelection(message.screenshotDataUrl)
+        .then(sendResponse)
+        .catch((error) => sendResponse({
+          ok: false,
+          error: error?.message || String(error)
+        }));
+      return true;
+    }
   });
 } catch {
   // The old content script can outlive an extension reload on the current page.
@@ -106,4 +115,198 @@ function showOCRToast(title, message, level) {
   setTimeout(() => {
     toast.remove();
   }, level === "error" ? 6000 : 3200);
+}
+
+
+function startRegionSelection(screenshotDataUrl) {
+  return new Promise((resolve, reject) => {
+    cleanupRegionOverlay();
+
+    const overlay = document.createElement("div");
+    overlay.id = "visionclip-region-overlay";
+    overlay.style.position = "fixed";
+    overlay.style.inset = "0";
+    overlay.style.zIndex = "2147483646";
+    overlay.style.cursor = "crosshair";
+    overlay.style.background = "rgba(15, 23, 42, 0.18)";
+    overlay.style.userSelect = "none";
+
+    const hint = document.createElement("div");
+    hint.textContent = "OCRしたい範囲をドラッグ / Escでキャンセル";
+    hint.style.position = "fixed";
+    hint.style.left = "50%";
+    hint.style.top = "18px";
+    hint.style.transform = "translateX(-50%)";
+    hint.style.padding = "8px 12px";
+    hint.style.borderRadius = "8px";
+    hint.style.background = "rgba(15, 23, 42, 0.92)";
+    hint.style.color = "#ffffff";
+    hint.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    hint.style.fontSize = "13px";
+    hint.style.lineHeight = "1.4";
+    hint.style.pointerEvents = "none";
+
+    const selection = document.createElement("div");
+    selection.style.position = "fixed";
+    selection.style.display = "none";
+    selection.style.border = "2px solid #22c55e";
+    selection.style.background = "rgba(34, 197, 94, 0.16)";
+    selection.style.boxShadow = "0 0 0 9999px rgba(15, 23, 42, 0.28)";
+    selection.style.pointerEvents = "none";
+
+    overlay.append(hint, selection);
+    document.documentElement.appendChild(overlay);
+
+    let startX = 0;
+    let startY = 0;
+    let currentRect = null;
+    let dragging = false;
+
+    const finish = (result) => {
+      document.removeEventListener("keydown", onKeyDown, true);
+      overlay.remove();
+      resolve(result);
+    };
+
+    const cancel = () => {
+      sendRuntimeMessageSafely({
+        type: "region_ocr_cancelled",
+        pageUrl: window.location.href
+      });
+      finish({ ok: false, cancelled: true });
+    };
+
+    const fail = (error) => {
+      document.removeEventListener("keydown", onKeyDown, true);
+      overlay.remove();
+      reject(error);
+    };
+
+    const updateSelection = (event) => {
+      const x = clamp(event.clientX, 0, window.innerWidth);
+      const y = clamp(event.clientY, 0, window.innerHeight);
+      const left = Math.min(startX, x);
+      const top = Math.min(startY, y);
+      const width = Math.abs(x - startX);
+      const height = Math.abs(y - startY);
+      currentRect = { x: left, y: top, width, height };
+
+      selection.style.display = "block";
+      selection.style.left = left + "px";
+      selection.style.top = top + "px";
+      selection.style.width = width + "px";
+      selection.style.height = height + "px";
+    };
+
+    const onPointerDown = (event) => {
+      if (event.button !== 0) {
+        return;
+      }
+      dragging = true;
+      startX = clamp(event.clientX, 0, window.innerWidth);
+      startY = clamp(event.clientY, 0, window.innerHeight);
+      updateSelection(event);
+      overlay.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+    };
+
+    const onPointerMove = (event) => {
+      if (!dragging) {
+        return;
+      }
+      updateSelection(event);
+      event.preventDefault();
+    };
+
+    const onPointerUp = async (event) => {
+      if (!dragging) {
+        return;
+      }
+      dragging = false;
+      updateSelection(event);
+      overlay.releasePointerCapture?.(event.pointerId);
+      event.preventDefault();
+
+      if (!currentRect || currentRect.width < 8 || currentRect.height < 8) {
+        cancel();
+        return;
+      }
+
+      try {
+        const imageDataUrl = await cropScreenshot(screenshotDataUrl, currentRect);
+        sendRuntimeMessageSafely({
+          type: "region_ocr_selected",
+          imageDataUrl,
+          pageUrl: window.location.href,
+          selection: currentRect
+        });
+        finish({ ok: true });
+      } catch (error) {
+        fail(error);
+      }
+    };
+
+    const onKeyDown = (event) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+      event.preventDefault();
+      cancel();
+    };
+
+    overlay.addEventListener("pointerdown", onPointerDown, true);
+    overlay.addEventListener("pointermove", onPointerMove, true);
+    overlay.addEventListener("pointerup", onPointerUp, true);
+    document.addEventListener("keydown", onKeyDown, true);
+  });
+}
+
+function cleanupRegionOverlay() {
+  document.getElementById("visionclip-region-overlay")?.remove();
+}
+
+async function cropScreenshot(screenshotDataUrl, rect) {
+  const image = await loadImage(screenshotDataUrl);
+  const scaleX = image.naturalWidth / window.innerWidth;
+  const scaleY = image.naturalHeight / window.innerHeight;
+  const sourceX = Math.round(rect.x * scaleX);
+  const sourceY = Math.round(rect.y * scaleY);
+  const sourceWidth = Math.max(1, Math.round(rect.width * scaleX));
+  const sourceHeight = Math.max(1, Math.round(rect.height * scaleY));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = sourceWidth;
+  canvas.height = sourceHeight;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("選択範囲を切り抜けませんでした。");
+  }
+
+  context.drawImage(
+    image,
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    0,
+    0,
+    sourceWidth,
+    sourceHeight
+  );
+
+  return canvas.toDataURL("image/png");
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("スクリーンショットを読み込めませんでした。"));
+    image.src = src;
+  });
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }

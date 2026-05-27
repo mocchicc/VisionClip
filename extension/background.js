@@ -31,6 +31,42 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }));
     return true;
   }
+
+  if (message?.type === "start_region_ocr") {
+    startRegionOCR()
+      .then(sendResponse)
+      .catch((error) => sendResponse({
+        ok: false,
+        error: error?.message || String(error)
+      }));
+    return true;
+  }
+
+  if (message?.type === "region_ocr_selected") {
+    processRegionSelection(message, sender)
+      .then(sendResponse)
+      .catch((error) => sendResponse({
+        ok: false,
+        error: error?.message || String(error)
+      }));
+    return true;
+  }
+
+  if (message?.type === "region_ocr_cancelled") {
+    saveCurrentStatus({
+      state: "cancelled",
+      title: "範囲OCRキャンセル",
+      message: "範囲選択をキャンセルしました。",
+      updatedAt: Date.now()
+    })
+      .then(() => chrome.action.setBadgeText({ text: "" }))
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) => sendResponse({
+        ok: false,
+        error: error?.message || String(error)
+      }));
+    return true;
+  }
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -98,6 +134,112 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     setTimeout(() => chrome.action.setBadgeText({ text: "" }), 3500);
   }
 });
+
+async function startRegionOCR() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id || tab.windowId == null) {
+    throw new Error("OCRするタブを見つけられませんでした。");
+  }
+
+  const startedAt = Date.now();
+  await setBadge("SEL", "#4f46e5");
+  await saveCurrentStatus({
+    state: "running",
+    title: "範囲選択中",
+    message: "ページ上でOCRしたい範囲をドラッグしてください。",
+    startedAt,
+    updatedAt: startedAt
+  });
+
+  const screenshotDataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, {
+    format: "png"
+  });
+
+  chrome.tabs.sendMessage(tab.id, {
+    type: "start_region_selection",
+    screenshotDataUrl
+  }).catch(async (error) => {
+    await setBadge("ERR", "#b91c1c");
+    await saveCurrentStatus({
+      state: "error",
+      title: "範囲OCR開始失敗",
+      message: error?.message || String(error),
+      updatedAt: Date.now()
+    });
+    setTimeout(() => chrome.action.setBadgeText({ text: "" }), 3500);
+  });
+
+  return { ok: true };
+}
+
+async function processRegionSelection(message, sender) {
+  const tab = sender.tab || {};
+  const startedAt = Date.now();
+  await setBadge("...", "#4f46e5");
+  await saveCurrentStatus({
+    state: "running",
+    title: "範囲OCR処理中",
+    message: tab.title || message.pageUrl || "選択範囲を読み取っています。",
+    startedAt,
+    updatedAt: startedAt
+  });
+
+  try {
+    const response = await sendNativeMessage({
+      type: "ocr_image",
+      imageDataUrl: message.imageDataUrl,
+      pageUrl: message.pageUrl || tab.url,
+      tabTitle: tab.title
+    });
+
+    if (!response?.ok) {
+      throw new Error(response?.error || "OCR failed.");
+    }
+
+    const finishedAt = Date.now();
+    await setBadge("OK", "#15803d");
+    await saveCurrentStatus({
+      state: "success",
+      title: "範囲OCR成功",
+      message: "選択範囲の抽出テキストをクリップボードにコピーしました。",
+      updatedAt: finishedAt
+    });
+    await addHistory({
+      state: "success",
+      title: `${tab.title || "範囲OCR"}（範囲）`,
+      message: response.textPreview || "抽出テキストをコピーしました。",
+      imageUrl: null,
+      pageUrl: message.pageUrl || tab.url,
+      model: response.model,
+      copied: response.copied === true,
+      createdAt: finishedAt
+    });
+    showToast(tab.id, "Region OCR copied", "選択範囲の抽出テキストをクリップボードにコピーしました。", "success");
+    return { ok: true };
+  } catch (error) {
+    const finishedAt = Date.now();
+    const errorMessage = error?.message || String(error);
+    await setBadge("ERR", "#b91c1c");
+    await saveCurrentStatus({
+      state: "error",
+      title: "範囲OCR失敗",
+      message: errorMessage,
+      updatedAt: finishedAt
+    });
+    await addHistory({
+      state: "error",
+      title: `${tab.title || "範囲OCR"}（範囲）`,
+      message: errorMessage,
+      imageUrl: null,
+      pageUrl: message.pageUrl || tab.url,
+      createdAt: finishedAt
+    });
+    showToast(tab.id, "Region OCR failed", errorMessage, "error");
+    throw error;
+  } finally {
+    setTimeout(() => chrome.action.setBadgeText({ text: "" }), 3500);
+  }
+}
 
 async function getDashboard() {
   const [nativeStatus, stored] = await Promise.all([

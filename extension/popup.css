@@ -56,6 +56,27 @@ button:hover {
   background: #f1f5f9;
 }
 
+.quick-actions {
+  margin-bottom: 10px;
+}
+
+.primary-action {
+  background: #111827;
+  border-color: #111827;
+  color: #ffffff;
+  font-weight: 700;
+  width: 100%;
+}
+
+.primary-action:hover {
+  background: #1f2937;
+}
+
+.primary-action:disabled {
+  cursor: default;
+  opacity: 0.62;
+}
+
 .status-card, .item {
   background: #ffffff;
   border: 1px solid #e2e8f0;

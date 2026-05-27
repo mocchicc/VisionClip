@@ -4,10 +4,29 @@ const statusMessage = document.getElementById("status-message");
 const historyRoot = document.getElementById("history");
 const refreshButton = document.getElementById("refresh");
 const settingsButton = document.getElementById("settings");
+const regionCaptureButton = document.getElementById("region-capture");
 
 refreshButton.addEventListener("click", loadDashboard);
 settingsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
+regionCaptureButton.addEventListener("click", startRegionOCR);
 document.addEventListener("DOMContentLoaded", loadDashboard);
+
+async function startRegionOCR() {
+  regionCaptureButton.disabled = true;
+  statusMessage.textContent = "範囲選択を開始しています...";
+  try {
+    const response = await chrome.runtime.sendMessage({ type: "start_region_ocr" });
+    if (!response?.ok) {
+      throw new Error(response?.error || "範囲OCRを開始できませんでした。");
+    }
+    window.close();
+  } catch (error) {
+    regionCaptureButton.disabled = false;
+    runStatus.textContent = "失敗";
+    runStatus.className = "bad";
+    statusMessage.textContent = error?.message || String(error);
+  }
+}
 
 async function loadDashboard() {
   keyStatus.textContent = "確認中...";
@@ -113,6 +132,7 @@ function labelForState(state) {
     case "running": return "処理中";
     case "success": return "成功";
     case "error": return "失敗";
+    case "cancelled": return "キャンセル";
     default: return "待機中";
   }
 }
@@ -122,6 +142,7 @@ function classForState(state) {
     case "success": return "ok";
     case "error": return "bad";
     case "running": return "warn";
+    case "cancelled": return "";
     default: return "";
   }
 }
