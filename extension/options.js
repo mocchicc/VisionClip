@@ -1,6 +1,6 @@
 const HOST_NAMES = ["com.mocchicc.visionclip", "com.mocchicc.image_ocr"];
 const MODEL_STORAGE_KEY = "ocrModel";
-const DEFAULT_MODEL = "gpt-4.1-mini";
+const DEFAULT_MODEL = "gpt-5.4-nano";
 const input = document.getElementById("api-key");
 const modelSelect = document.getElementById("model");
 const saveButton = document.getElementById("save");

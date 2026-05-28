@@ -157,18 +157,6 @@ popupで `確認失敗` や `Error when communicating with the native messaging 
 
 Chrome側で拡張をreloadするか、Chromeを再起動すると反映されることがあります。
 
-### テストで画像URLを直接OCRしたい
-
-画像URLは実在する画像を指定してください。`https://example.com/image.png` はダミーなので使えません。
-
-Chrome上の画像で試すほうが簡単ですが、CLIで試す場合は、実在するPNG/JPEG/WEBP/GIFのURLを指定します。
-
-```sh
-"$HOME/Library/Application Support/VisionClip/image-ocr-host" ocr-url "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/320px-Example.jpg"
-```
-
-成功すると、結果が表示され、同時にクリップボードにもコピーされます。
-
 ## アンインストール
 
 ```sh
@@ -202,4 +190,4 @@ APIキーも消したい場合は、先に次を実行します。
 - Chrome拡張は、右クリックメニューまたは範囲選択UIからMac側に画像情報を渡します。
 - Mac側のSwiftプログラムがOpenAI Responses APIを呼び、結果をクリップボードへコピーします。
 - Native Messagingの設定は `scripts/install_native_host.sh` が作成します。
-- デフォルトモデルは `gpt-4.1-mini` です。
+- デフォルトモデルは `gpt-5.4-nano` です。
