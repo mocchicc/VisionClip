@@ -1,5 +1,6 @@
 const HOST_NAMES = ["com.mocchicc.visionclip", "com.mocchicc.image_ocr"];
-const MENU_ID = "ocr-image";
+const IMAGE_MENU_ID = "ocr-image";
+const REGION_MENU_ID = "ocr-region";
 const MODEL_STORAGE_KEY = "ocrModel";
 const DEFAULT_MODEL = "gpt-5.4-nano";
 const MAX_INLINE_IMAGE_BYTES = 12 * 1024 * 1024;
@@ -8,9 +9,14 @@ const recentContextImages = new Map();
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: MENU_ID,
+    id: IMAGE_MENU_ID,
     title: "この画像をOCRする",
     contexts: ["image"]
+  });
+  chrome.contextMenus.create({
+    id: REGION_MENU_ID,
+    title: "この画面の範囲をOCRする",
+    contexts: ["page", "selection", "link", "image"]
   });
 });
 
@@ -72,7 +78,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId !== MENU_ID) {
+  if (info.menuItemId === REGION_MENU_ID) {
+    startRegionOCR(tab).catch(handleRegionOCRStartError);
+    return;
+  }
+
+  if (info.menuItemId !== IMAGE_MENU_ID) {
     return;
   }
 
@@ -138,8 +149,16 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 });
 
-async function startRegionOCR() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+chrome.commands.onCommand.addListener((command) => {
+  if (command !== "start-region-ocr") {
+    return;
+  }
+
+  startRegionOCR().catch(handleRegionOCRStartError);
+});
+
+async function startRegionOCR(targetTab = null) {
+  const tab = targetTab?.id ? targetTab : (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
   if (!tab?.id || tab.windowId == null) {
     throw new Error("OCRするタブを見つけられませんでした。");
   }
@@ -173,6 +192,18 @@ async function startRegionOCR() {
   });
 
   return { ok: true };
+}
+
+async function handleRegionOCRStartError(error) {
+  const message = error?.message || String(error);
+  await setBadge("ERR", "#b91c1c");
+  await saveCurrentStatus({
+    state: "error",
+    title: "範囲OCR開始失敗",
+    message,
+    updatedAt: Date.now()
+  });
+  setTimeout(() => chrome.action.setBadgeText({ text: "" }), 3500);
 }
 
 async function processRegionSelection(message, sender) {

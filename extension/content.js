@@ -118,7 +118,9 @@ function showOCRToast(title, message, level) {
 }
 
 
-function startRegionSelection(screenshotDataUrl) {
+async function startRegionSelection(screenshotDataUrl) {
+  const screenshotImage = await loadImage(screenshotDataUrl);
+
   return new Promise((resolve, reject) => {
     cleanupRegionOverlay();
 
@@ -128,8 +130,16 @@ function startRegionSelection(screenshotDataUrl) {
     overlay.style.inset = "0";
     overlay.style.zIndex = "2147483646";
     overlay.style.cursor = "crosshair";
-    overlay.style.background = "rgba(15, 23, 42, 0.18)";
+    overlay.style.background = "#0f172a";
     overlay.style.userSelect = "none";
+
+    const screenshot = createScreenshotCanvas(screenshotImage);
+    screenshot.style.position = "fixed";
+    screenshot.style.inset = "0";
+    screenshot.style.width = "100vw";
+    screenshot.style.height = "100vh";
+    screenshot.style.pointerEvents = "none";
+    screenshot.style.userSelect = "none";
 
     const hint = document.createElement("div");
     hint.textContent = "OCRしたい範囲をドラッグ / Escでキャンセル";
@@ -154,7 +164,7 @@ function startRegionSelection(screenshotDataUrl) {
     selection.style.boxShadow = "0 0 0 9999px rgba(15, 23, 42, 0.28)";
     selection.style.pointerEvents = "none";
 
-    overlay.append(hint, selection);
+    overlay.append(screenshot, hint, selection);
     document.documentElement.appendChild(overlay);
 
     let startX = 0;
@@ -164,6 +174,7 @@ function startRegionSelection(screenshotDataUrl) {
 
     const finish = (result) => {
       document.removeEventListener("keydown", onKeyDown, true);
+      suppressFollowUpPageEvents();
       overlay.remove();
       resolve(result);
     };
@@ -199,6 +210,7 @@ function startRegionSelection(screenshotDataUrl) {
     };
 
     const onPointerDown = (event) => {
+      suppressPageEvent(event);
       if (event.button !== 0) {
         return;
       }
@@ -207,25 +219,24 @@ function startRegionSelection(screenshotDataUrl) {
       startY = clamp(event.clientY, 0, window.innerHeight);
       updateSelection(event);
       overlay.setPointerCapture?.(event.pointerId);
-      event.preventDefault();
     };
 
     const onPointerMove = (event) => {
+      suppressPageEvent(event);
       if (!dragging) {
         return;
       }
       updateSelection(event);
-      event.preventDefault();
     };
 
     const onPointerUp = async (event) => {
+      suppressPageEvent(event);
       if (!dragging) {
         return;
       }
       dragging = false;
       updateSelection(event);
       overlay.releasePointerCapture?.(event.pointerId);
-      event.preventDefault();
 
       if (!currentRect || currentRect.width < 8 || currentRect.height < 8) {
         cancel();
@@ -233,7 +244,7 @@ function startRegionSelection(screenshotDataUrl) {
       }
 
       try {
-        const imageDataUrl = await cropScreenshot(screenshotDataUrl, currentRect);
+        const imageDataUrl = cropScreenshotImage(screenshotImage, currentRect);
         sendRuntimeMessageSafely({
           type: "region_ocr_selected",
           imageDataUrl,
@@ -246,27 +257,85 @@ function startRegionSelection(screenshotDataUrl) {
       }
     };
 
+    const onPointerCancel = (event) => {
+      suppressPageEvent(event);
+      cancel();
+    };
+
     const onKeyDown = (event) => {
       if (event.key !== "Escape") {
         return;
       }
-      event.preventDefault();
+      suppressPageEvent(event);
       cancel();
     };
 
     overlay.addEventListener("pointerdown", onPointerDown, true);
     overlay.addEventListener("pointermove", onPointerMove, true);
     overlay.addEventListener("pointerup", onPointerUp, true);
+    overlay.addEventListener("pointercancel", onPointerCancel, true);
+    for (const eventType of [
+      "mousedown",
+      "mouseup",
+      "click",
+      "auxclick",
+      "dblclick",
+      "contextmenu",
+      "touchstart",
+      "touchmove",
+      "touchend",
+      "wheel"
+    ]) {
+      overlay.addEventListener(eventType, suppressPageEvent, { capture: true, passive: false });
+    }
     document.addEventListener("keydown", onKeyDown, true);
   });
+}
+
+function createScreenshotCanvas(image) {
+  const canvas = document.createElement("canvas");
+  canvas.width = image.naturalWidth;
+  canvas.height = image.naturalHeight;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("スクリーンショットを表示できませんでした。");
+  }
+
+  context.drawImage(image, 0, 0);
+  return canvas;
+}
+
+function suppressPageEvent(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation?.();
+}
+
+function suppressFollowUpPageEvents() {
+  const targets = [window, document, document.documentElement];
+  const eventTypes = ["click", "auxclick", "dblclick", "mousedown", "mouseup"];
+
+  for (const target of targets) {
+    for (const eventType of eventTypes) {
+      target.addEventListener(eventType, suppressPageEvent, { capture: true, passive: false });
+    }
+  }
+
+  setTimeout(() => {
+    for (const target of targets) {
+      for (const eventType of eventTypes) {
+        target.removeEventListener(eventType, suppressPageEvent, true);
+      }
+    }
+  }, 500);
 }
 
 function cleanupRegionOverlay() {
   document.getElementById("visionclip-region-overlay")?.remove();
 }
 
-async function cropScreenshot(screenshotDataUrl, rect) {
-  const image = await loadImage(screenshotDataUrl);
+function cropScreenshotImage(image, rect) {
   const scaleX = image.naturalWidth / window.innerWidth;
   const scaleY = image.naturalHeight / window.innerHeight;
   const sourceX = Math.round(rect.x * scaleX);

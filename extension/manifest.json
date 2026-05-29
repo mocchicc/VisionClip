@@ -31,5 +31,13 @@
     "default_title": "VisionClip - Image OCR to Clipboard",
     "default_popup": "popup.html"
   },
+  "commands": {
+    "start-region-ocr": {
+      "suggested_key": {
+        "default": "Alt+Shift+O"
+      },
+      "description": "範囲OCRを開始"
+    }
+  },
   "options_page": "options.html"
 }
