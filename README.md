@@ -256,7 +256,7 @@ node scripts/check_release_readiness.js --strict
 
 GitHub Actionsでも、pull requestとmainへのpush時に `./scripts/check.sh`、release artifact生成、zip内容とchecksum検証、release zip内installerのsmoke testを実行します。
 
-`v<version>` 形式のタグをpushするか、`Release Artifacts` workflowを手動実行すると、同じ検証を通したrelease artifactがGitHub Actions artifactとして保存されます。タグ名は `extension/manifest.json` のversionと一致している必要があります。
+`v<version>` 形式のタグをpushすると、同じ検証を通したrelease artifactがGitHub Releaseへ添付されます。`Release Artifacts` workflowを手動実行した場合は、GitHub Actions artifactとして保存されます。タグ名は `extension/manifest.json` のversionと一致している必要があります。
 
 拡張アイコンは `assets/extension-icon-source.png` から生成しています。source画像を差し替えた場合は、次を実行して `extension/icons/` のPNGを更新してください。
 

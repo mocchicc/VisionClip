@@ -179,7 +179,7 @@ function checkReleaseDocs() {
   for (const requiredText of [
     "Chrome Web Store公開",
     "notarization",
-    "GitHub Releases",
+    "GitHub Release",
     "実機表示"
   ]) {
     if (!releaseChecklist.includes(requiredText)) {
@@ -210,6 +210,13 @@ function checkWorkflows() {
     "node scripts/check_release_package.js",
     "./scripts/check_release_install.sh",
     "actions/upload-artifact@v4",
+    "permissions:",
+    "contents: write",
+    "GH_TOKEN",
+    "gh release create",
+    "gh release upload",
+    "RELEASE_NOTES_",
+    "--verify-tag",
     "dist/*.zip",
     "dist/checksums-*.txt"
   ]) {
@@ -271,7 +278,7 @@ function collectManualBlockers() {
   }
 
   const releaseWorkflow = readText(".github/workflows/release-artifacts.yml");
-  if (!/(gh release|softprops\/action-gh-release|actions\/create-release|upload-release-asset)/i.test(releaseWorkflow)) {
+  if (!/gh release (create|upload)/i.test(releaseWorkflow)) {
     manualBlockers.push("GitHub Releases upload is not automated; current workflow stores Actions artifacts only.");
   }
 
