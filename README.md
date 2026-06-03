@@ -205,6 +205,7 @@ APIキーも消したい場合は、先に次を実行します。
 - セキュリティ報告: [SECURITY.md](SECURITY.md)
 - 開発への参加: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Chrome Web Store提出用メモ: [docs/STORE_LISTING.md](docs/STORE_LISTING.md)
+- macOS配布メモ: [docs/MACOS_DISTRIBUTION.md](docs/MACOS_DISTRIBUTION.md)
 
 ## 技術メモ
 
@@ -242,5 +243,7 @@ Chrome拡張zip、macOS Native Messagingホストzip、SHA-256 checksumを `dist
 - `dist/checksums-v<version>.txt`
 
 native host zipには、build済み `image-ocr-host`、配布zip内から実行する `install_native_host.sh` / `uninstall_native_host.sh`、README、security/support/contributing docsが含まれます。現時点では署名・notarization済みinstallerではありません。
+
+Developer ID Application証明書を使ってnative host binaryへ署名する場合は、`VISIONCLIP_CODESIGN_IDENTITY` を指定して `./scripts/package_release.sh` を実行できます。詳しくは [docs/MACOS_DISTRIBUTION.md](docs/MACOS_DISTRIBUTION.md) を参照してください。
 
 リリース前の確認項目は [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) にまとめています。

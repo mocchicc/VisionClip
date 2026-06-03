@@ -40,6 +40,8 @@ APIキーはユーザー自身のOpenAI APIキーを使います。APIキーはm
 
 現在は公開MVPです。Chrome Web Storeで配布する場合も、macOS Native Messagingホストのインストールが別途必要です。
 
+macOS native hostの署名・notarization・installer化の状態は [MACOS_DISTRIBUTION.md](./MACOS_DISTRIBUTION.md) にまとめています。
+
 ## Single Purpose
 
 ユーザーが明示的に選択した画像、または画面上の選択範囲から文字を抽出し、抽出テキストをmacOSのクリップボードへコピーすること。

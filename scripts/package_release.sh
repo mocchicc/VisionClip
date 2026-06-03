@@ -11,6 +11,8 @@ NATIVE_PACKAGE_DIR="$WORK_DIR/visionclip-native-host-macos-$ARCH-v$VERSION"
 EXTENSION_ZIP="$DIST_DIR/visionclip-extension-v$VERSION.zip"
 NATIVE_ZIP="$DIST_DIR/visionclip-native-host-macos-$ARCH-v$VERSION.zip"
 CHECKSUMS_FILE="$DIST_DIR/checksums-v$VERSION.txt"
+CODESIGN_IDENTITY="${VISIONCLIP_CODESIGN_IDENTITY:-}"
+SIGNING_STATUS="unsigned"
 
 trap 'rm -rf "$WORK_DIR"' EXIT
 
@@ -38,6 +40,12 @@ chmod 755 "$NATIVE_PACKAGE_DIR/image-ocr-host"
 chmod 755 "$NATIVE_PACKAGE_DIR/install_native_host.sh"
 chmod 755 "$NATIVE_PACKAGE_DIR/uninstall_native_host.sh"
 
+if [[ -n "$CODESIGN_IDENTITY" ]]; then
+  codesign --force --timestamp --options runtime --sign "$CODESIGN_IDENTITY" "$NATIVE_PACKAGE_DIR/image-ocr-host"
+  codesign --verify --strict --verbose=2 "$NATIVE_PACKAGE_DIR/image-ocr-host"
+  SIGNING_STATUS="signed with $CODESIGN_IDENTITY"
+fi
+
 (
   cd "$WORK_DIR"
   zip -qr "$NATIVE_ZIP" "$(basename "$NATIVE_PACKAGE_DIR")" -x '*.DS_Store'
@@ -52,3 +60,4 @@ echo "Created release artifacts:"
 echo "  $EXTENSION_ZIP"
 echo "  $NATIVE_ZIP"
 echo "  $CHECKSUMS_FILE"
+echo "Native host signing: $SIGNING_STATUS"
