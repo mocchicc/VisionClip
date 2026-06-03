@@ -22,6 +22,16 @@ if (nativeVersion !== manifestVersion) {
   throw new Error(`Version mismatch: manifest=${manifestVersion}, native-host=${nativeVersion}`);
 }
 
+const releaseNotesPath = path.join(root, `docs/RELEASE_NOTES_v${manifestVersion}.md`);
+if (!fs.statSync(releaseNotesPath, { throwIfNoEntry: false })?.isFile()) {
+  throw new Error(`Missing release notes for ${manifestVersion}: ${releaseNotesPath}`);
+}
+
+const changelog = fs.readFileSync(path.join(root, "CHANGELOG.md"), "utf8");
+if (!changelog.includes(`## ${manifestVersion} - `)) {
+  throw new Error(`CHANGELOG.md is missing an entry for ${manifestVersion}`);
+}
+
 for (const forbidden of [
   /version:\s*"0\.1\.0"/,
   /VisionClip\/0\.1"/

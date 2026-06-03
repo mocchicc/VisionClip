@@ -10,7 +10,7 @@ VisionClipのmacOS Native Messagingホストを一般配布へ近づけるため
 - macOS native host zip
 - SHA-256 checksum
 
-native host zipには、build済み `image-ocr-host`、`install_native_host.sh`、`uninstall_native_host.sh`、README、support/security/contributing docs、`docs/`、`samples/`、告知用の `assets/social/` と `assets/store/` が入ります。
+native host zipには、build済み `image-ocr-host`、`install_native_host.sh`、`uninstall_native_host.sh`、README、CHANGELOG、support/security/contributing docs、`docs/`、`samples/`、告知用の `assets/social/` と `assets/store/` が入ります。
 
 ## 任意のcodesign
 

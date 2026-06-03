@@ -223,8 +223,10 @@ APIキーも消したい場合は、先に次を実行します。
 - 使い方や不具合報告: [SUPPORT.md](SUPPORT.md)
 - セキュリティ報告: [SECURITY.md](SECURITY.md)
 - 開発への参加: [CONTRIBUTING.md](CONTRIBUTING.md)
+- 変更履歴: [CHANGELOG.md](CHANGELOG.md)
 - Chrome Web Store提出用メモ: [docs/STORE_LISTING.md](docs/STORE_LISTING.md)
 - macOS配布メモ: [docs/MACOS_DISTRIBUTION.md](docs/MACOS_DISTRIBUTION.md)
+- v0.1.0リリースノート: [docs/RELEASE_NOTES_v0.1.0.md](docs/RELEASE_NOTES_v0.1.0.md)
 - 告知文と画像素材: [docs/ANNOUNCEMENT.md](docs/ANNOUNCEMENT.md)
 
 ## 技術メモ
@@ -276,7 +278,7 @@ release zip内の `install_native_host.sh` が一時HOMEへ正しくインスト
 - `dist/visionclip-native-host-macos-<arch>-v<version>.zip`
 - `dist/checksums-v<version>.txt`
 
-native host zipには、build済み `image-ocr-host`、配布zip内から実行する `install_native_host.sh` / `uninstall_native_host.sh`、README、security/support/contributing docs、サンプル画像、告知用画像素材が含まれます。現時点では署名・notarization済みinstallerではありません。
+native host zipには、build済み `image-ocr-host`、配布zip内から実行する `install_native_host.sh` / `uninstall_native_host.sh`、README、CHANGELOG、security/support/contributing docs、サンプル画像、告知用画像素材が含まれます。現時点では署名・notarization済みinstallerではありません。
 
 Developer ID Application証明書を使ってnative host binaryへ署名する場合は、`VISIONCLIP_CODESIGN_IDENTITY` を指定して `./scripts/package_release.sh` を実行できます。詳しくは [docs/MACOS_DISTRIBUTION.md](docs/MACOS_DISTRIBUTION.md) を参照してください。
 
