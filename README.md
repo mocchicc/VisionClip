@@ -134,9 +134,18 @@ Chrome右上の拡張ボタンからpopupを開くと、次を確認できます
 
 動作確認用のサンプル画像を `samples/` に置いています。通常のChromeページ上で画像を開いた状態で、右クリックOCRや範囲OCRを試すためのテスト素材です。日本語と英語が混ざったUI、レシート、ラベル、ホワイトボード風の画像です。
 
+- `samples/index.html`
 - `samples/ocr-sample-01-dashboard.png`
 - `samples/ocr-sample-02-receipts-labels.png`
 - `samples/ocr-sample-03-whiteboard-notes.png`
+
+ローカル確認ページとして開く場合は、次を実行してから `http://localhost:8787/` をChromeで開いてください。
+
+```sh
+python3 -m http.server 8787 --directory samples
+```
+
+このページでは、画像の右クリックOCR、ページ上の範囲OCR、`Modal` ボタンで開いた画像への範囲OCRを同じfixtureで確認できます。
 
 ## うまく動かないとき
 
@@ -261,7 +270,7 @@ node scripts/check_release_package.js
 - `dist/visionclip-native-host-macos-<arch>-v<version>.zip`
 - `dist/checksums-v<version>.txt`
 
-native host zipには、build済み `image-ocr-host`、配布zip内から実行する `install_native_host.sh` / `uninstall_native_host.sh`、README、security/support/contributing docs、告知用画像素材が含まれます。現時点では署名・notarization済みinstallerではありません。
+native host zipには、build済み `image-ocr-host`、配布zip内から実行する `install_native_host.sh` / `uninstall_native_host.sh`、README、security/support/contributing docs、サンプル画像、告知用画像素材が含まれます。現時点では署名・notarization済みinstallerではありません。
 
 Developer ID Application証明書を使ってnative host binaryへ署名する場合は、`VISIONCLIP_CODESIGN_IDENTITY` を指定して `./scripts/package_release.sh` を実行できます。詳しくは [docs/MACOS_DISTRIBUTION.md](docs/MACOS_DISTRIBUTION.md) を参照してください。
 

@@ -86,6 +86,8 @@ VisionClipの開発者は、独自サーバーでOCR対象画像、OCR結果、A
 
 Chrome Web Storeでは、実際のユーザー体験と主要機能が伝わるスクリーンショットを用意します。公式docsでは少なくとも1枚、できれば最大5枚のスクリーンショットが推奨されています。サイズは `1280x800`、または `640x400` を使います。
 
+スクリーンショット撮影には `samples/index.html` を使えます。ローカルで `python3 -m http.server 8787 --directory samples` を実行し、`http://localhost:8787/` をChromeで開くと、右クリックOCR、範囲OCR、モーダル上の範囲OCRを同じfixtureで撮れます。
+
 優先して用意する画像:
 
 1. 画像右クリックメニューから `この画像をOCRする` を選ぶ画面
@@ -154,9 +156,10 @@ Reviewer向けに必要なら次を記載します。
 1. Chromeで拡張をインストールする。
 2. macOS Native MessagingホストをREADMEの手順でインストールする。
 3. Options画面でOpenAI APIキーを保存する。
-4. `samples/` の画像をChromeで開き、画像右クリックOCRを実行する。
+4. `samples/index.html` をローカルHTTPで開き、画像右クリックOCRを実行する。
 5. popupまたは `Option+Shift+O` から範囲OCRを実行する。
-6. OCR結果がmacOSクリップボードにコピーされ、popup履歴に表示されることを確認する。
+6. `Modal` ボタンで画像を開き、モーダル上で範囲OCRを実行する。
+7. OCR結果がmacOSクリップボードにコピーされ、popup履歴に表示されることを確認する。
 
 OpenAI APIキーはreviewer側で用意する必要があります。APIキーはmacOS Keychainに保存され、Chrome拡張には保存されません。
 

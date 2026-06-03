@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisionClip OCR Samples</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --ink: #122033;
+      --muted: #65758b;
+      --line: #d8e1ec;
+      --panel: #ffffff;
+      --navy: #062349;
+      --mint: #38e0c0;
+      --shadow: 0 18px 48px rgba(15, 35, 62, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 22px clamp(20px, 4vw, 48px);
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--navy);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 800;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button,
+    a.button {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font: inherit;
+      font-size: 14px;
+      min-height: 38px;
+      padding: 8px 12px;
+      text-decoration: none;
+    }
+
+    button.primary {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #ffffff;
+    }
+
+    main {
+      width: min(1180px, calc(100vw - 40px));
+      margin: 28px auto 44px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .sample-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 8px 28px rgba(15, 35, 62, 0.08);
+      min-width: 0;
+    }
+
+    .sample-card img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      background: #e9eef5;
+    }
+
+    .sample-body {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.3;
+    }
+
+    .sample-body p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      background: rgba(12, 24, 39, 0.62);
+    }
+
+    .modal-backdrop[open] {
+      display: grid;
+    }
+
+    .modal {
+      width: min(980px, 100%);
+      max-height: min(760px, calc(100vh - 48px));
+      overflow: hidden;
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .modal-frame {
+      max-height: calc(100vh - 132px);
+      overflow: auto;
+      padding: 18px;
+      background: #eef3f8;
+    }
+
+    .modal-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+      background: #ffffff;
+    }
+
+    @media (max-width: 1120px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        justify-content: flex-start;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">VC</div>
+      <div>
+        <h1>VisionClip OCR Samples</h1>
+        <p class="subtitle">Generated fixtures for image OCR, region OCR, modal capture, and store screenshots.</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <a class="button" href="ocr-sample-01-dashboard.png" target="_blank" rel="noreferrer">Open image</a>
+      <button class="primary" type="button" data-open-modal="ocr-sample-01-dashboard.png">Open modal</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid" aria-label="OCR sample images">
+      <article class="sample-card">
+        <img src="ocr-sample-01-dashboard.png" alt="Dashboard sample with Japanese and English UI text">
+        <div class="sample-body">
+          <h2>Dashboard UI</h2>
+          <p>Tables, status cards, Japanese and English interface labels, and compact numbers.</p>
+          <div class="actions">
+            <a class="button" href="ocr-sample-01-dashboard.png" target="_blank" rel="noreferrer">Open</a>
+            <button type="button" data-open-modal="ocr-sample-01-dashboard.png">Modal</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="sample-card">
+        <img src="ocr-sample-02-receipts-labels.png" alt="Receipt and shipping label sample with small text">
+        <div class="sample-body">
+          <h2>Receipts / Labels</h2>
+          <p>Small receipts, shipping labels, prices, dates, warning notes, and mixed contrast.</p>
+          <div class="actions">
+            <a class="button" href="ocr-sample-02-receipts-labels.png" target="_blank" rel="noreferrer">Open</a>
+            <button type="button" data-open-modal="ocr-sample-02-receipts-labels.png">Modal</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="sample-card">
+        <img src="ocr-sample-03-whiteboard-notes.png" alt="Whiteboard and sticky note sample with handwritten-style text">
+        <div class="sample-body">
+          <h2>Whiteboard Notes</h2>
+          <p>Handwritten-style notes, sticky notes, lower contrast markers, and loose reading order.</p>
+          <div class="actions">
+            <a class="button" href="ocr-sample-03-whiteboard-notes.png" target="_blank" rel="noreferrer">Open</a>
+            <button type="button" data-open-modal="ocr-sample-03-whiteboard-notes.png">Modal</button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="sample-modal" role="dialog" aria-modal="true" aria-labelledby="sample-modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="sample-modal-title">Sample Preview</h2>
+        <button type="button" data-close-modal>Close</button>
+      </div>
+      <div class="modal-frame">
+        <img id="modal-image" src="ocr-sample-01-dashboard.png" alt="Selected OCR sample">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById("sample-modal");
+    const modalImage = document.getElementById("modal-image");
+    const modalTitle = document.getElementById("sample-modal-title");
+
+    for (const button of document.querySelectorAll("[data-open-modal]")) {
+      button.addEventListener("click", () => {
+        const imagePath = button.getAttribute("data-open-modal");
+        modalImage.src = imagePath;
+        modalTitle.textContent = button.closest(".sample-card")?.querySelector("h2")?.textContent || "Sample Preview";
+        modal.setAttribute("open", "");
+      });
+    }
+
+    document.querySelector("[data-close-modal]").addEventListener("click", closeModal);
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && modal.hasAttribute("open")) {
+        closeModal();
+      }
+    });
+
+    function closeModal() {
+      modal.removeAttribute("open");
+    }
+  </script>
+</body>
+</html>

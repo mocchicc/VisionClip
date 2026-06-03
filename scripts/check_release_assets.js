@@ -8,6 +8,11 @@ const socialImages = [
   "assets/social/x-workflow-keychain.png",
   "assets/social/x-product-hero.png"
 ];
+const sampleImages = [
+  "samples/ocr-sample-01-dashboard.png",
+  "samples/ocr-sample-02-receipts-labels.png",
+  "samples/ocr-sample-03-whiteboard-notes.png"
+];
 
 for (const relativePath of socialImages) {
   const metadata = readPngMetadata(path.join(root, relativePath));
@@ -24,6 +29,29 @@ for (const relativePath of socialImages) {
 const promotional = readPngMetadata(path.join(root, "assets/store/promotional-small.png"));
 if (promotional.width !== 440 || promotional.height !== 280) {
   throw new Error(`assets/store/promotional-small.png must be 440x280, got ${promotional.width}x${promotional.height}`);
+}
+
+for (const relativePath of sampleImages) {
+  const metadata = readPngMetadata(path.join(root, relativePath));
+  if (metadata.width < 1200 || metadata.height < 800) {
+    throw new Error(`${relativePath} should be large enough for OCR smoke tests`);
+  }
+}
+
+const samplePage = "samples/index.html";
+const samplePagePath = path.join(root, samplePage);
+const sampleHtml = fs.readFileSync(samplePagePath, "utf8");
+for (const relativePath of sampleImages) {
+  const fileName = path.basename(relativePath);
+  if (!sampleHtml.includes(fileName)) {
+    throw new Error(`${samplePage} must reference ${fileName}`);
+  }
+}
+for (const match of sampleHtml.matchAll(/(?:src|href|data-open-modal)="([^"]+\.png)"/g)) {
+  const referencedPath = path.join(path.dirname(samplePagePath), match[1]);
+  if (!fs.existsSync(referencedPath)) {
+    throw new Error(`${samplePage} references missing image ${match[1]}`);
+  }
 }
 
 for (const relativePath of [
