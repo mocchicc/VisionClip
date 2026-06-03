@@ -235,7 +235,7 @@ private final class OCRService {
                 model: Config.defaultModel,
                 error: nil,
                 keyIsSet: (try? KeychainStore.readAPIKey()) != nil,
-                version: "0.1.0"
+                version: Config.version
             )
         }
 
@@ -252,7 +252,7 @@ private final class OCRService {
                 model: Config.defaultModel,
                 error: nil,
                 keyIsSet: true,
-                version: "0.1.0"
+                version: Config.version
             )
         }
 
@@ -546,7 +546,7 @@ private enum ImageInputLoader {
         }
 
         var urlRequest = URLRequest(url: url)
-        urlRequest.setValue("Mozilla/5.0 VisionClip/0.1", forHTTPHeaderField: "User-Agent")
+        urlRequest.setValue("Mozilla/5.0 VisionClip/\(Config.version)", forHTTPHeaderField: "User-Agent")
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
         if let httpResponse = response as? HTTPURLResponse, !(200..<300).contains(httpResponse.statusCode) {
