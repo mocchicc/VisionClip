@@ -246,6 +246,8 @@ APIキーも消したい場合は、先に次を実行します。
 
 GitHub Actionsでも、pull requestとmainへのpush時に `./scripts/check.sh`、release artifact生成、zip内容とchecksum検証、release zip内installerのsmoke testを実行します。
 
+`v<version>` 形式のタグをpushするか、`Release Artifacts` workflowを手動実行すると、同じ検証を通したrelease artifactがGitHub Actions artifactとして保存されます。タグ名は `extension/manifest.json` のversionと一致している必要があります。
+
 拡張アイコンは `assets/extension-icon-source.png` から生成しています。source画像を差し替えた場合は、次を実行して `extension/icons/` のPNGを更新してください。
 
 ```sh
@@ -270,6 +272,13 @@ release zip内の `install_native_host.sh` が一時HOMEへ正しくインスト
 
 ```sh
 ./scripts/check_release_install.sh
+```
+
+タグからrelease artifactを作る場合:
+
+```sh
+git tag v0.1.0
+git push origin v0.1.0
 ```
 
 作成される主なファイル:
