@@ -1,0 +1,71 @@
+name: Bug report
+description: VisionClipの不具合を報告する
+title: "[bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        APIキー、機密画像、個人情報を含むOCR結果、ログイン後画面のスクリーンショットは載せないでください。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: 何が起きているかを短く書いてください。
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: 公開しても問題ない範囲で手順を書いてください。
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待した動作
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の動作
+    validations:
+      required: true
+  - type: dropdown
+    id: feature
+    attributes:
+      label: 関連する機能
+      options:
+        - 画像右クリックOCR
+        - 範囲OCR
+        - モーダル/ポップアップ上の範囲OCR
+        - APIキー保存
+        - OCR履歴
+        - Native Messaging host
+        - install / uninstall script
+        - docs / release artifact
+        - その他
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: macOS 15.x
+  - type: input
+    id: chrome
+    attributes:
+      label: Chrome version
+      placeholder: Chrome 1xx
+  - type: textarea
+    id: notes
+    attributes:
+      label: 補足
+      description: 公開して問題ないログやスクリーンショットだけを貼ってください。

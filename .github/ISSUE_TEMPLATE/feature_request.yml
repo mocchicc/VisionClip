@@ -1,0 +1,44 @@
+name: Feature request
+description: VisionClipへの改善提案を書く
+title: "[feature] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        APIキー、機密画像、個人情報を含むOCR結果、ログイン後画面のスクリーンショットは載せないでください。
+  - type: textarea
+    id: problem
+    attributes:
+      label: 解決したいこと
+      description: どんな場面で困っているかを書いてください。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提案
+      description: どんな改善があると良さそうかを書いてください。
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 関連領域
+      options:
+        - OCR精度
+        - Chrome拡張UX
+        - Native Messaging host
+        - APIキー/Keychain
+        - privacy / security
+        - release / installer
+        - docs
+        - その他
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 代替案
+      description: すでに試した回避策や別案があれば書いてください。

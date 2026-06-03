@@ -197,6 +197,14 @@ APIキーも消したい場合は、先に次を実行します。
 - `Load unpacked` を使う開発者向けインストール手順です。
 - macOSの署名、notarization、installer化は未対応です。
 
+## 貢献・サポート
+
+不具合報告や機能提案はGitHub Issuesで受け付けます。APIキー、機密画像、個人情報を含むOCR結果は公開issueへ載せないでください。
+
+- 使い方や不具合報告: [SUPPORT.md](SUPPORT.md)
+- セキュリティ報告: [SECURITY.md](SECURITY.md)
+- 開発への参加: [CONTRIBUTING.md](CONTRIBUTING.md)
+
 ## 技術メモ
 
 - Chrome拡張は、右クリックメニューまたは範囲選択UIからMac側に画像情報を渡します。
@@ -226,6 +234,6 @@ Chrome拡張zip、macOS Native Messagingホストzip、SHA-256 checksumを `dist
 - `dist/visionclip-native-host-macos-<arch>-v<version>.zip`
 - `dist/checksums-v<version>.txt`
 
-native host zipには、build済み `image-ocr-host` と、配布zip内から実行する `install_native_host.sh` / `uninstall_native_host.sh` が含まれます。現時点では署名・notarization済みinstallerではありません。
+native host zipには、build済み `image-ocr-host`、配布zip内から実行する `install_native_host.sh` / `uninstall_native_host.sh`、README、security/support/contributing docsが含まれます。現時点では署名・notarization済みinstallerではありません。
 
 リリース前の確認項目は [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) にまとめています。
