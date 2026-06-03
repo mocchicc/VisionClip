@@ -10,6 +10,12 @@ VisionClipを公開するときのX投稿文と添付画像候補です。大げ
   OCRからclipboard、Keychain管理までの流れを見せたいときに使います。
 - `assets/social/x-product-hero.png`  
   プロダクト感を強めたい告知や英語投稿に向いています。
+- `assets/social/x-imagegen-modal-range-ocr.png`
+  GPT-Image系で生成した、モーダル内の画像を範囲OCRしていることが一目で伝わる候補です。
+- `assets/social/x-imagegen-workflow-keychain.png`
+  OCRからclipboard、BYOK/Keychainまでの流れを1枚で説明したいときに向いています。
+- `assets/social/x-imagegen-launch-desk.png`
+  ツールの雰囲気を柔らかく見せたいローンチ告知向けです。
 - `assets/store/promotional-small.png`  
   Chrome Web Store small promotional image向けの440x280画像です。
 
@@ -67,5 +73,6 @@ https://github.com/mocchicc/VisionClip
 
 ## おすすめ
 
-- 日本語: 案2 + `assets/social/x-modal-range-ocr.png`
-- 英語: Draft 2 + `assets/social/x-product-hero.png`
+- 日本語: 案2 + `assets/social/x-imagegen-modal-range-ocr.png`
+- 英語: Draft 2 + `assets/social/x-imagegen-workflow-keychain.png`
+- 実画面寄りで見せたい場合: `assets/social/x-modal-range-ocr.png`

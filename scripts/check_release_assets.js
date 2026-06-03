@@ -6,7 +6,10 @@ const root = path.resolve(__dirname, "..");
 const socialImages = [
   "assets/social/x-modal-range-ocr.png",
   "assets/social/x-workflow-keychain.png",
-  "assets/social/x-product-hero.png"
+  "assets/social/x-product-hero.png",
+  "assets/social/x-imagegen-modal-range-ocr.png",
+  "assets/social/x-imagegen-workflow-keychain.png",
+  "assets/social/x-imagegen-launch-desk.png"
 ];
 const sampleImages = [
   "samples/ocr-sample-01-dashboard.png",

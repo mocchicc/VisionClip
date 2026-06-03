@@ -42,6 +42,9 @@ forbidEntries(extensionEntries, [
 ]);
 
 const nativeRoot = `visionclip-native-host-macos-${arch}-v${version}`;
+const licenseFile = ["LICENSE", "LICENSE.md", "LICENCE", "COPYING"]
+  .find((fileName) => fs.existsSync(path.join(root, fileName)));
+
 requireEntries(nativeEntries, [
   `${nativeRoot}/image-ocr-host`,
   `${nativeRoot}/install_native_host.sh`,
@@ -66,8 +69,15 @@ requireEntries(nativeEntries, [
   `${nativeRoot}/assets/social/x-modal-range-ocr.png`,
   `${nativeRoot}/assets/social/x-workflow-keychain.png`,
   `${nativeRoot}/assets/social/x-product-hero.png`,
+  `${nativeRoot}/assets/social/x-imagegen-modal-range-ocr.png`,
+  `${nativeRoot}/assets/social/x-imagegen-workflow-keychain.png`,
+  `${nativeRoot}/assets/social/x-imagegen-launch-desk.png`,
   `${nativeRoot}/assets/store/promotional-small.png`
 ]);
+
+if (licenseFile) {
+  requireEntries(nativeEntries, [`${nativeRoot}/${licenseFile}`]);
+}
 
 verifyChecksums([
   path.basename(extensionZip),

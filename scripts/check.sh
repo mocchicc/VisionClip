@@ -17,11 +17,13 @@ node --check scripts/check_extension_assets.js
 node --check scripts/check_release_assets.js
 node --check scripts/check_release_package.js
 node --check scripts/check_release_tag.js
+node --check scripts/check_license_policy.js
 node --check scripts/check_native_message.js
 node --check scripts/check_version_consistency.js
 node scripts/check_extension_assets.js
 node scripts/check_release_assets.js
 node scripts/check_release_tag.js "v$MANIFEST_VERSION"
+node scripts/check_license_policy.js
 node scripts/check_version_consistency.js
 ruby -e "require 'yaml'; Dir['.github/**/*.yml'].sort.each { |path| YAML.load_file(path) }"
 
