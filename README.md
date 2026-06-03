@@ -236,7 +236,7 @@ APIキーも消したい場合は、先に次を実行します。
 
 ## 開発時の確認
 
-変更後は次を実行すると、Chrome拡張のJS構文、manifest JSON、release asset、version整合性、shell script構文、Swift release build、空白差分をまとめて確認できます。
+変更後は次を実行すると、Chrome拡張のJS構文、manifest JSON、release asset、version整合性、shell script構文、Swift release build、Native Messagingのstatus応答、空白差分をまとめて確認できます。
 
 ```sh
 ./scripts/check.sh

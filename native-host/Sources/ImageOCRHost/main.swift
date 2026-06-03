@@ -73,6 +73,7 @@ private struct OCRRequest: Decodable {
     let prompt: String?
     let detail: String?
     let apiKey: String?
+    let checkKeychain: Bool?
 }
 
 private struct TokenUsage: Encodable {
@@ -176,7 +177,8 @@ struct ImageOCRHost {
                 model: arguments.count >= 3 ? arguments[2] : nil,
                 prompt: nil,
                 detail: nil,
-                apiKey: nil
+                apiKey: nil,
+                checkKeychain: nil
             )
             let response = try await OCRService().process(request)
             print(response.textPreview ?? "")
@@ -234,7 +236,7 @@ private final class OCRService {
                 copied: nil,
                 model: Config.defaultModel,
                 error: nil,
-                keyIsSet: (try? KeychainStore.readAPIKey()) != nil,
+                keyIsSet: request.checkKeychain == false ? false : (try? KeychainStore.readAPIKey()) != nil,
                 version: Config.version
             )
         }

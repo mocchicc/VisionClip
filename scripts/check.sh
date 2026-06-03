@@ -15,6 +15,7 @@ node --check extension/popup.js
 node --check scripts/check_extension_assets.js
 node --check scripts/check_release_assets.js
 node --check scripts/check_release_package.js
+node --check scripts/check_native_message.js
 node --check scripts/check_version_consistency.js
 node scripts/check_extension_assets.js
 node scripts/check_release_assets.js
@@ -29,5 +30,6 @@ bash -n scripts/uninstall_native_host.sh
 swift build -c release --package-path native-host --build-path "$BUILD_DIR"
 "$BUILD_DIR/release/image-ocr-host" version >/dev/null
 "$BUILD_DIR/release/image-ocr-host" diagnose >/dev/null
+node scripts/check_native_message.js "$BUILD_DIR/release/image-ocr-host"
 
 git diff --check
