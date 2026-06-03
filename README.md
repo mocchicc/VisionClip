@@ -182,6 +182,8 @@ APIキーも消したい場合は、先に次を実行します。
 - Chrome拡張は画像取得と範囲選択のために広めの権限を使っています。
 - 現時点ではMVP配布向けで、正式配布向けの署名済みinstallerではありません。
 
+詳しいデータ取り扱いは [docs/PRIVACY.md](docs/PRIVACY.md)、Chrome拡張権限の理由は [docs/CHROME_PERMISSIONS.md](docs/CHROME_PERMISSIONS.md) を参照してください。
+
 ## 今の制限
 
 - PNG、JPEG、WEBP、非アニメーションGIFが主な対象です。
@@ -219,3 +221,5 @@ Chrome拡張zip、macOS Native Messagingホストzip、SHA-256 checksumを `dist
 - `dist/checksums-v<version>.txt`
 
 native host zipには、build済み `image-ocr-host` と、配布zip内から実行する `install_native_host.sh` / `uninstall_native_host.sh` が含まれます。現時点では署名・notarization済みinstallerではありません。
+
+リリース前の確認項目は [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) にまとめています。

@@ -30,6 +30,7 @@ cp "$BUILD_DIR/release/image-ocr-host" "$NATIVE_PACKAGE_DIR/image-ocr-host"
 cp "$ROOT_DIR/scripts/install_release_native_host.sh" "$NATIVE_PACKAGE_DIR/install_native_host.sh"
 cp "$ROOT_DIR/scripts/uninstall_native_host.sh" "$NATIVE_PACKAGE_DIR/uninstall_native_host.sh"
 cp "$ROOT_DIR/README.md" "$NATIVE_PACKAGE_DIR/README.md"
+cp -R "$ROOT_DIR/docs" "$NATIVE_PACKAGE_DIR/docs"
 chmod 755 "$NATIVE_PACKAGE_DIR/image-ocr-host"
 chmod 755 "$NATIVE_PACKAGE_DIR/install_native_host.sh"
 chmod 755 "$NATIVE_PACKAGE_DIR/uninstall_native_host.sh"
@@ -39,7 +40,10 @@ chmod 755 "$NATIVE_PACKAGE_DIR/uninstall_native_host.sh"
   zip -qr "$NATIVE_ZIP" "$(basename "$NATIVE_PACKAGE_DIR")" -x '*.DS_Store'
 )
 
-shasum -a 256 "$EXTENSION_ZIP" "$NATIVE_ZIP" > "$CHECKSUMS_FILE"
+(
+  cd "$DIST_DIR"
+  shasum -a 256 "$(basename "$EXTENSION_ZIP")" "$(basename "$NATIVE_ZIP")" > "$(basename "$CHECKSUMS_FILE")"
+)
 
 echo "Created release artifacts:"
 echo "  $EXTENSION_ZIP"
