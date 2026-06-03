@@ -66,8 +66,8 @@ node scripts/check_release_package.js
 
 日本語:
 
-> 画像の中に閉じ込められた文字を、もう手で打ち直したくないのでVisionClipを作りました。Chromeで画像を右クリック、または画面範囲を選ぶだけでOCRしてコピー。自分のOpenAI APIキーを使うBYOK運用で、キーはmacOS Keychainに保存します。公開MVPとしてOSSで育てます。
+> 画像の中に閉じ込められた文字を、もう手で打ち直したくないのでVisionClipを作りました。Chromeで画像を右クリック、または画面範囲を選ぶだけでOCRしてコピー。自分のOpenAI APIキーを使うBYOK運用で、キーはmacOS Keychainに保存します。まずは公開MVPとして育てます。
 
 English:
 
-> Text trapped inside images is a tiny daily tax, so I built VisionClip. Right-click an image or select a screen region, run OCR, and get the result on your macOS clipboard. It uses your own OpenAI API key and keeps it in Keychain. OSS/public MVP.
+> Text trapped inside images is a tiny daily tax, so I built VisionClip. Right-click an image or select a screen region, run OCR, and get the result on your macOS clipboard. It uses your own OpenAI API key and keeps it in Keychain. Public MVP.
