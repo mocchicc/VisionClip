@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+VERSION="$(node -e "console.log(JSON.parse(require('fs').readFileSync('$ROOT_DIR/extension/manifest.json', 'utf8')).version)")"
+ARCH="$(uname -m)"
+DIST_DIR="$ROOT_DIR/dist"
+WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/visionclip-release.XXXXXX")"
+BUILD_DIR="$WORK_DIR/native-build"
+NATIVE_PACKAGE_DIR="$WORK_DIR/visionclip-native-host-macos-$ARCH-v$VERSION"
+EXTENSION_ZIP="$DIST_DIR/visionclip-extension-v$VERSION.zip"
+NATIVE_ZIP="$DIST_DIR/visionclip-native-host-macos-$ARCH-v$VERSION.zip"
+CHECKSUMS_FILE="$DIST_DIR/checksums-v$VERSION.txt"
+
+trap 'rm -rf "$WORK_DIR"' EXIT
+
+mkdir -p "$DIST_DIR"
+rm -f "$EXTENSION_ZIP" "$NATIVE_ZIP" "$CHECKSUMS_FILE"
+
+(
+  cd "$ROOT_DIR/extension"
+  zip -qr "$EXTENSION_ZIP" . -x '*.DS_Store'
+)
+
+export CLANG_MODULE_CACHE_PATH="$BUILD_DIR/clang-module-cache"
+swift build -c release --package-path "$ROOT_DIR/native-host" --build-path "$BUILD_DIR"
+
+mkdir -p "$NATIVE_PACKAGE_DIR"
+cp "$BUILD_DIR/release/image-ocr-host" "$NATIVE_PACKAGE_DIR/image-ocr-host"
+cp "$ROOT_DIR/scripts/install_release_native_host.sh" "$NATIVE_PACKAGE_DIR/install_native_host.sh"
+cp "$ROOT_DIR/scripts/uninstall_native_host.sh" "$NATIVE_PACKAGE_DIR/uninstall_native_host.sh"
+cp "$ROOT_DIR/README.md" "$NATIVE_PACKAGE_DIR/README.md"
+chmod 755 "$NATIVE_PACKAGE_DIR/image-ocr-host"
+chmod 755 "$NATIVE_PACKAGE_DIR/install_native_host.sh"
+chmod 755 "$NATIVE_PACKAGE_DIR/uninstall_native_host.sh"
+
+(
+  cd "$WORK_DIR"
+  zip -qr "$NATIVE_ZIP" "$(basename "$NATIVE_PACKAGE_DIR")" -x '*.DS_Store'
+)
+
+shasum -a 256 "$EXTENSION_ZIP" "$NATIVE_ZIP" > "$CHECKSUMS_FILE"
+
+echo "Created release artifacts:"
+echo "  $EXTENSION_ZIP"
+echo "  $NATIVE_ZIP"
+echo "  $CHECKSUMS_FILE"

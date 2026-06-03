@@ -203,3 +203,19 @@ APIキーも消したい場合は、先に次を実行します。
 ```sh
 ./scripts/check.sh
 ```
+
+## リリース用artifact作成
+
+Chrome拡張zip、macOS Native Messagingホストzip、SHA-256 checksumを `dist/` に作成できます。
+
+```sh
+./scripts/package_release.sh
+```
+
+作成される主なファイル:
+
+- `dist/visionclip-extension-v<version>.zip`
+- `dist/visionclip-native-host-macos-<arch>-v<version>.zip`
+- `dist/checksums-v<version>.txt`
+
+native host zipには、build済み `image-ocr-host` と、配布zip内から実行する `install_native_host.sh` / `uninstall_native_host.sh` が含まれます。現時点では署名・notarization済みinstallerではありません。

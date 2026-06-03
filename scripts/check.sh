@@ -15,6 +15,8 @@ node --check extension/popup.js
 node -e "JSON.parse(require('fs').readFileSync('extension/manifest.json', 'utf8'));"
 
 bash -n scripts/install_native_host.sh
+bash -n scripts/install_release_native_host.sh
+bash -n scripts/package_release.sh
 bash -n scripts/uninstall_native_host.sh
 
 swift build -c release --package-path native-host --build-path "$BUILD_DIR"
