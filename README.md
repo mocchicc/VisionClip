@@ -179,7 +179,7 @@ APIキーも消したい場合は、先に次を実行します。
 - OCR対象の画像、または選択範囲のスクリーンショットはOpenAI APIへ送信されます。
 - OCR履歴保存がONの場合、OCR結果の最近5件はChromeのローカルストレージに保存されます。履歴はpopupから削除でき、設定画面で新規保存をOFFにできます。
 - 機密文書、個人情報、公開できない画面で使う場合は、所属組織や利用環境のルールとOpenAI API利用方針を確認してください。
-- Chrome拡張は画像取得と範囲選択のために広めの権限を使っています。
+- Chrome拡張は、ユーザーがOCRを開始したときだけ現在のタブへ一時的にアクセスします。
 - 現時点の配布はGitHubからの手動セットアップで、署名済みinstallerではありません。
 
 詳しいデータ取り扱いは [docs/PRIVACY.md](docs/PRIVACY.md)、Chrome拡張権限の理由は [docs/CHROME_PERMISSIONS.md](docs/CHROME_PERMISSIONS.md) を参照してください。

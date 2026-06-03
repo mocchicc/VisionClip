@@ -12,7 +12,7 @@ node --check extension/background.js
 node --check extension/content.js
 node --check extension/options.js
 node --check extension/popup.js
-node -e "JSON.parse(require('fs').readFileSync('extension/manifest.json', 'utf8'));"
+node -e "const manifest = JSON.parse(require('fs').readFileSync('extension/manifest.json', 'utf8')); if ((manifest.host_permissions || []).includes('<all_urls>')) throw new Error('manifest must not request <all_urls> host permission'); if ((manifest.content_scripts || []).some((script) => (script.matches || []).includes('<all_urls>'))) throw new Error('manifest must not inject content scripts on <all_urls>');"
 
 bash -n scripts/install_native_host.sh
 bash -n scripts/install_release_native_host.sh
