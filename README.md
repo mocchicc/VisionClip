@@ -204,6 +204,7 @@ APIキーも消したい場合は、先に次を実行します。
 - 使い方や不具合報告: [SUPPORT.md](SUPPORT.md)
 - セキュリティ報告: [SECURITY.md](SECURITY.md)
 - 開発への参加: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Chrome Web Store提出用メモ: [docs/STORE_LISTING.md](docs/STORE_LISTING.md)
 
 ## 技術メモ
 
