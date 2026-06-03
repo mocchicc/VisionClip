@@ -13,6 +13,15 @@ issueを書く前に確認してほしいもの:
 - [docs/CHROME_PERMISSIONS.md](docs/CHROME_PERMISSIONS.md) のChrome権限説明
 - [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) の現在の制限
 
+Native MessagingホストやAPIキー状態で困っている場合は、公開して問題ない範囲で次の出力も添えてください。
+
+```sh
+"$HOME/Library/Application Support/VisionClip/image-ocr-host" diagnose <Chrome拡張ID>
+"$HOME/Library/Application Support/VisionClip/image-ocr-host" check-key
+```
+
+これらのコマンドはAPIキーの値やOCR結果を表示しません。Keychainアクセスの問題を含めて診断したい場合は、`diagnose <Chrome拡張ID> --check-keychain` も使えます。
+
 ## issueに載せないでほしいもの
 
 - OpenAI APIキー

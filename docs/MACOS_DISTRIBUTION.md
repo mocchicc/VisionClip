@@ -61,6 +61,8 @@ spctl --assess --type execute --verbose=4 path/to/image-ocr-host
 Native Messaging install後:
 
 ```sh
+"$HOME/Library/Application Support/VisionClip/image-ocr-host" version
+"$HOME/Library/Application Support/VisionClip/image-ocr-host" diagnose <Chrome拡張ID>
 "$HOME/Library/Application Support/VisionClip/image-ocr-host" check-key
 ```
 

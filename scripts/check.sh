@@ -22,5 +22,7 @@ bash -n scripts/package_release.sh
 bash -n scripts/uninstall_native_host.sh
 
 swift build -c release --package-path native-host --build-path "$BUILD_DIR"
+"$BUILD_DIR/release/image-ocr-host" version >/dev/null
+"$BUILD_DIR/release/image-ocr-host" diagnose >/dev/null
 
 git diff --check
