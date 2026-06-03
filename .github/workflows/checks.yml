@@ -21,3 +21,6 @@ jobs:
 
       - name: Verify release artifacts
         run: node scripts/check_release_package.js
+
+      - name: Smoke test release installer
+        run: ./scripts/check_release_install.sh
