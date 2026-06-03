@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/visionclip-check-build.XXXXXX")"
+trap 'rm -rf "$BUILD_DIR"' EXIT
+
+cd "$ROOT_DIR"
+export CLANG_MODULE_CACHE_PATH="$BUILD_DIR/clang-module-cache"
+
+node --check extension/background.js
+node --check extension/content.js
+node --check extension/options.js
+node --check extension/popup.js
+node -e "JSON.parse(require('fs').readFileSync('extension/manifest.json', 'utf8'));"
+
+bash -n scripts/install_native_host.sh
+bash -n scripts/uninstall_native_host.sh
+
+swift build -c release --package-path native-host --build-path "$BUILD_DIR"
+
+git diff --check
