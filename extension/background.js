@@ -2,6 +2,7 @@ const HOST_NAMES = ["com.mocchicc.visionclip", "com.mocchicc.image_ocr"];
 const IMAGE_MENU_ID = "ocr-image";
 const REGION_MENU_ID = "ocr-region";
 const MODEL_STORAGE_KEY = "ocrModel";
+const HISTORY_ENABLED_STORAGE_KEY = "historyEnabled";
 const DEFAULT_MODEL = "gpt-5.4-nano";
 const MAX_INLINE_IMAGE_BYTES = 12 * 1024 * 1024;
 const HISTORY_LIMIT = 5;
@@ -43,6 +44,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "start_region_ocr") {
     startRegionOCR()
       .then(sendResponse)
+      .catch((error) => sendResponse({
+        ok: false,
+        error: error?.message || String(error)
+      }));
+    return true;
+  }
+
+  if (message?.type === "clear_history") {
+    clearHistory()
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) => sendResponse({
+        ok: false,
+        error: error?.message || String(error)
+      }));
+    return true;
+  }
+
+  if (message?.type === "set_history_enabled") {
+    setHistoryEnabled(message.enabled !== false)
+      .then(() => sendResponse({ ok: true }))
       .catch((error) => sendResponse({
         ok: false,
         error: error?.message || String(error)
@@ -281,13 +302,14 @@ async function processRegionSelection(message, sender) {
 async function getDashboard() {
   const [nativeStatus, stored] = await Promise.all([
     getNativeStatus(),
-    chrome.storage.local.get(["currentStatus", "history", MODEL_STORAGE_KEY])
+    chrome.storage.local.get(["currentStatus", "history", MODEL_STORAGE_KEY, HISTORY_ENABLED_STORAGE_KEY])
   ]);
 
   return {
     ok: true,
     nativeStatus,
     selectedModel: stored[MODEL_STORAGE_KEY] || DEFAULT_MODEL,
+    historyEnabled: stored[HISTORY_ENABLED_STORAGE_KEY] !== false,
     currentStatus: stored.currentStatus || null,
     history: stored.history || []
   };
@@ -311,10 +333,23 @@ async function saveCurrentStatus(status) {
 }
 
 async function addHistory(item) {
-  const { history = [] } = await chrome.storage.local.get("history");
+  const stored = await chrome.storage.local.get(["history", HISTORY_ENABLED_STORAGE_KEY]);
+  if (stored[HISTORY_ENABLED_STORAGE_KEY] === false) {
+    return;
+  }
+
+  const history = stored.history || [];
   await chrome.storage.local.set({
     history: [item, ...history].slice(0, HISTORY_LIMIT)
   });
+}
+
+async function clearHistory() {
+  await chrome.storage.local.remove("history");
+}
+
+async function setHistoryEnabled(enabled) {
+  await chrome.storage.local.set({ [HISTORY_ENABLED_STORAGE_KEY]: enabled });
 }
 
 async function getSelectedModel() {

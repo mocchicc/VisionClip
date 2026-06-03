@@ -73,6 +73,13 @@ input {
   flex: 1;
 }
 
+input[type="checkbox"] {
+  flex: none;
+  height: 16px;
+  margin: 0;
+  width: 16px;
+}
+
 select {
   background: #ffffff;
   width: 100%;
@@ -114,6 +121,14 @@ button:hover {
   line-height: 1.5;
   margin-top: 14px;
   white-space: pre-wrap;
+}
+
+.checkbox-row {
+  align-items: center;
+  display: flex;
+  font-weight: 500;
+  gap: 8px;
+  margin-bottom: 0;
 }
 
 .ok { color: #15803d; }

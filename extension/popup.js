@@ -3,6 +3,8 @@ const modelStatus = document.getElementById("model-status");
 const runStatus = document.getElementById("run-status");
 const statusMessage = document.getElementById("status-message");
 const historyRoot = document.getElementById("history");
+const historyNote = document.getElementById("history-note");
+const clearHistoryButton = document.getElementById("clear-history");
 const refreshButton = document.getElementById("refresh");
 const settingsButton = document.getElementById("settings");
 const regionCaptureButton = document.getElementById("region-capture");
@@ -10,6 +12,7 @@ const regionCaptureButton = document.getElementById("region-capture");
 refreshButton.addEventListener("click", loadDashboard);
 settingsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
 regionCaptureButton.addEventListener("click", startRegionOCR);
+clearHistoryButton.addEventListener("click", clearHistory);
 document.addEventListener("DOMContentLoaded", loadDashboard);
 
 async function startRegionOCR() {
@@ -46,7 +49,7 @@ async function loadDashboard() {
     runStatus.textContent = "拡張エラー";
     runStatus.className = "bad";
     statusMessage.textContent = error?.message || String(error);
-    renderHistory([]);
+    renderHistory([], true);
   }
 }
 
@@ -82,15 +85,18 @@ function renderDashboard(dashboard) {
     statusMessage.textContent = nativeStatus.error;
   }
 
-  renderHistory(dashboard?.history || []);
+  renderHistory(dashboard?.history || [], dashboard?.historyEnabled !== false);
 }
 
-function renderHistory(history) {
+function renderHistory(history, historyEnabled) {
   historyRoot.innerHTML = "";
+  clearHistoryButton.disabled = history.length === 0;
+  historyNote.textContent = historyEnabled ? "" : "履歴保存はOFFです。新しいOCR結果は保存されません。";
+
   if (history.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = "まだ履歴はありません。";
+    empty.textContent = historyEnabled ? "まだ履歴はありません。" : "保存済みの履歴はありません。";
     historyRoot.appendChild(empty);
     return;
   }
@@ -139,6 +145,24 @@ function renderHistory(history) {
       element.appendChild(usageMeta);
     }
     historyRoot.appendChild(element);
+  }
+}
+
+async function clearHistory() {
+  clearHistoryButton.disabled = true;
+  try {
+    const response = await chrome.runtime.sendMessage({ type: "clear_history" });
+    if (!response?.ok) {
+      throw new Error(response?.error || "履歴を削除できませんでした。");
+    }
+
+    await loadDashboard();
+    statusMessage.textContent = "OCR履歴を削除しました。";
+  } catch (error) {
+    clearHistoryButton.disabled = false;
+    runStatus.textContent = "失敗";
+    runStatus.className = "bad";
+    statusMessage.textContent = error?.message || String(error);
   }
 }
 
