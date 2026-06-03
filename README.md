@@ -233,6 +233,8 @@ APIキーも消したい場合は、先に次を実行します。
 ./scripts/check.sh
 ```
 
+GitHub Actionsでも、pull requestとmainへのpush時に `./scripts/check.sh`、release artifact生成、zip内容とchecksum検証を実行します。
+
 拡張アイコンは `assets/extension-icon-source.png` から生成しています。source画像を差し替えた場合は、次を実行して `extension/icons/` のPNGを更新してください。
 
 ```sh
@@ -245,6 +247,12 @@ Chrome拡張zip、macOS Native Messagingホストzip、SHA-256 checksumを `dist
 
 ```sh
 ./scripts/package_release.sh
+```
+
+生成後にrelease zipの中身とchecksumを確認する場合は、次を実行します。
+
+```sh
+node scripts/check_release_package.js
 ```
 
 作成される主なファイル:

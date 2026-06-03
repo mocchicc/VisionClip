@@ -15,3 +15,9 @@ jobs:
 
       - name: Run checks
         run: ./scripts/check.sh
+
+      - name: Build release artifacts
+        run: ./scripts/package_release.sh
+
+      - name: Verify release artifacts
+        run: node scripts/check_release_package.js
