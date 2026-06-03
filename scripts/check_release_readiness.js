@@ -7,6 +7,13 @@ const quiet = process.argv.includes("--quiet");
 
 const failures = [];
 const manualBlockers = [];
+const storeScreenshotFiles = [
+  "assets/store/screenshots/store-screenshot-01-image-context.png",
+  "assets/store/screenshots/store-screenshot-02-region-ocr.png",
+  "assets/store/screenshots/store-screenshot-03-popup-history.png",
+  "assets/store/screenshots/store-screenshot-04-options-keychain.png",
+  "assets/store/screenshots/store-screenshot-05-modal-shortcut.png"
+];
 
 const manifest = readJson("extension/manifest.json");
 const docsDir = path.join(root, "docs");
@@ -37,10 +44,13 @@ checkRequiredFiles([
   "docs/RELEASE_CHECKLIST.md",
   "docs/STORE_LISTING.md",
   `docs/RELEASE_NOTES_v${manifest.version}.md`,
+  "assets/store/screenshot-source.html",
+  "scripts/generate_store_screenshots.sh",
   "scripts/check.sh",
   "scripts/package_release.sh",
   "scripts/check_release_package.js",
-  "scripts/check_release_install.sh"
+  "scripts/check_release_install.sh",
+  ...storeScreenshotFiles
 ]);
 checkMarkdownLinks();
 checkPermissionsDocs();
@@ -170,7 +180,7 @@ function checkReleaseDocs() {
     "Chrome Web Store公開",
     "notarization",
     "GitHub Releases",
-    "実機スクリーンショット"
+    "実機表示"
   ]) {
     if (!releaseChecklist.includes(requiredText)) {
       failures.push(`docs/RELEASE_CHECKLIST.md must keep manual release blocker: ${requiredText}`);
@@ -265,8 +275,8 @@ function collectManualBlockers() {
     manualBlockers.push("GitHub Releases upload is not automated; current workflow stores Actions artifacts only.");
   }
 
-  if (!hasAnyFileMatching(["screenshot"])) {
-    manualBlockers.push("Chrome Web Store screenshots are not present; create real store screenshots before Store submission.");
+  if (!storeScreenshotFiles.every((fileName) => fs.existsSync(path.join(root, fileName)))) {
+    manualBlockers.push("Chrome Web Store screenshots are not present; create 1280x800 screenshots before Store submission.");
   }
 }
 

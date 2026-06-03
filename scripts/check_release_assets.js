@@ -16,6 +16,13 @@ const sampleImages = [
   "samples/ocr-sample-02-receipts-labels.png",
   "samples/ocr-sample-03-whiteboard-notes.png"
 ];
+const storeScreenshots = [
+  "assets/store/screenshots/store-screenshot-01-image-context.png",
+  "assets/store/screenshots/store-screenshot-02-region-ocr.png",
+  "assets/store/screenshots/store-screenshot-03-popup-history.png",
+  "assets/store/screenshots/store-screenshot-04-options-keychain.png",
+  "assets/store/screenshots/store-screenshot-05-modal-shortcut.png"
+];
 
 for (const relativePath of socialImages) {
   const metadata = readPngMetadata(path.join(root, relativePath));
@@ -32,6 +39,13 @@ for (const relativePath of socialImages) {
 const promotional = readPngMetadata(path.join(root, "assets/store/promotional-small.png"));
 if (promotional.width !== 440 || promotional.height !== 280) {
   throw new Error(`assets/store/promotional-small.png must be 440x280, got ${promotional.width}x${promotional.height}`);
+}
+
+for (const relativePath of storeScreenshots) {
+  const metadata = readPngMetadata(path.join(root, relativePath));
+  if (metadata.width !== 1280 || metadata.height !== 800) {
+    throw new Error(`${relativePath} must be 1280x800 for Chrome Web Store screenshots, got ${metadata.width}x${metadata.height}`);
+  }
 }
 
 for (const relativePath of sampleImages) {
@@ -59,7 +73,8 @@ for (const match of sampleHtml.matchAll(/(?:src|href|data-open-modal)="([^"]+\.p
 
 for (const relativePath of [
   ...socialImages,
-  "assets/store/promotional-small.png"
+  "assets/store/promotional-small.png",
+  ...storeScreenshots
 ]) {
   if (relativePath.startsWith("extension/")) {
     throw new Error(`${relativePath} must not be stored inside extension/`);

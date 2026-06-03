@@ -72,7 +72,13 @@ requireEntries(nativeEntries, [
   `${nativeRoot}/assets/social/x-imagegen-modal-range-ocr.png`,
   `${nativeRoot}/assets/social/x-imagegen-workflow-keychain.png`,
   `${nativeRoot}/assets/social/x-imagegen-launch-desk.png`,
-  `${nativeRoot}/assets/store/promotional-small.png`
+  `${nativeRoot}/assets/store/promotional-small.png`,
+  `${nativeRoot}/assets/store/screenshot-source.html`,
+  `${nativeRoot}/assets/store/screenshots/store-screenshot-01-image-context.png`,
+  `${nativeRoot}/assets/store/screenshots/store-screenshot-02-region-ocr.png`,
+  `${nativeRoot}/assets/store/screenshots/store-screenshot-03-popup-history.png`,
+  `${nativeRoot}/assets/store/screenshots/store-screenshot-04-options-keychain.png`,
+  `${nativeRoot}/assets/store/screenshots/store-screenshot-05-modal-shortcut.png`
 ]);
 
 if (licenseFile) {
