@@ -221,6 +221,12 @@ APIキーも消したい場合は、先に次を実行します。
 ./scripts/check.sh
 ```
 
+拡張アイコンは `assets/extension-icon-source.png` から生成しています。source画像を差し替えた場合は、次を実行して `extension/icons/` のPNGを更新してください。
+
+```sh
+./scripts/generate_extension_icons.swift
+```
+
 ## リリース用artifact作成
 
 Chrome拡張zip、macOS Native Messagingホストzip、SHA-256 checksumを `dist/` に作成できます。
