@@ -242,10 +242,16 @@ APIキーも消したい場合は、先に次を実行します。
 
 ## 開発時の確認
 
-変更後は次を実行すると、Chrome拡張のJS構文、manifest JSON、release asset、version整合性、shell script構文、Swift release build、Native Messagingのstatus応答、空白差分をまとめて確認できます。
+変更後は次を実行すると、Chrome拡張のJS構文、manifest JSON、release asset、version整合性、release readiness、shell script構文、Swift release build、Native Messagingのstatus応答、空白差分をまとめて確認できます。
 
 ```sh
 ./scripts/check.sh
+```
+
+一般公開に近い配布判断の前は、残っている手動ブロッカーをexit codeでも確認できます。
+
+```sh
+node scripts/check_release_readiness.js --strict
 ```
 
 GitHub Actionsでも、pull requestとmainへのpush時に `./scripts/check.sh`、release artifact生成、zip内容とchecksum検証、release zip内installerのsmoke testを実行します。
