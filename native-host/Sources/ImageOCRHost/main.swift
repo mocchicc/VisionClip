@@ -13,12 +13,24 @@ private enum Config {
     static let defaultModel = "gpt-5.4-nano"
     static let defaultDetail = "high"
     static let logPath = NSHomeDirectory() + "/Library/Logs/VisionClip/native-host.log"
-    static let installDir = NSHomeDirectory() + "/Library/Application Support/VisionClip"
-    static let chromeHostDir = NSHomeDirectory() + "/Library/Application Support/Google/Chrome/NativeMessagingHosts"
-    static let installedBinaryPath = installDir + "/image-ocr-host"
-    static let installedWrapperPath = installDir + "/visionclip-native-host"
-    static let hostManifestPath = chromeHostDir + "/" + hostName + ".json"
-    static let legacyHostManifestPath = chromeHostDir + "/" + legacyHostName + ".json"
+    static let userInstallDir = NSHomeDirectory() + "/Library/Application Support/VisionClip"
+    static let userChromeHostDir = NSHomeDirectory() + "/Library/Application Support/Google/Chrome/NativeMessagingHosts"
+    static let systemInstallDir = "/Library/Application Support/VisionClip"
+    static let systemChromeHostDir = "/Library/Google/Chrome/NativeMessagingHosts"
+    static let userInstalledBinaryPath = userInstallDir + "/image-ocr-host"
+    static let userInstalledWrapperPath = userInstallDir + "/visionclip-native-host"
+    static let userHostManifestPath = userChromeHostDir + "/" + hostName + ".json"
+    static let userLegacyHostManifestPath = userChromeHostDir + "/" + legacyHostName + ".json"
+    static let systemInstalledBinaryPath = systemInstallDir + "/image-ocr-host"
+    static let systemInstalledWrapperPath = systemInstallDir + "/visionclip-native-host"
+    static let systemHostManifestPath = systemChromeHostDir + "/" + hostName + ".json"
+    static let systemLegacyHostManifestPath = systemChromeHostDir + "/" + legacyHostName + ".json"
+    static let installDir = userInstallDir
+    static let chromeHostDir = userChromeHostDir
+    static let installedBinaryPath = userInstalledBinaryPath
+    static let installedWrapperPath = userInstalledWrapperPath
+    static let hostManifestPath = userHostManifestPath
+    static let legacyHostManifestPath = userLegacyHostManifestPath
     static let maxImageBytes = 50 * 1024 * 1024
     static let maxNativeResponsePreviewCharacters = 8_000
     static let defaultPrompt = """
@@ -420,10 +432,14 @@ private enum NativeHostDiagnostics {
         print("version: \(Config.version)")
         print("defaultModel: \(Config.defaultModel)")
         print("runningExecutable: \(executablePath)")
-        print("installedBinary: \(statusLine(path: Config.installedBinaryPath))")
-        print("installedWrapper: \(statusLine(path: Config.installedWrapperPath))")
-        print("hostManifest: \(manifestStatus(path: Config.hostManifestPath, expectedName: Config.hostName, expectedExtensionID: expectedExtensionID))")
-        print("legacyHostManifest: \(manifestStatus(path: Config.legacyHostManifestPath, expectedName: Config.legacyHostName, expectedExtensionID: expectedExtensionID))")
+        print("userInstalledBinary: \(statusLine(path: Config.userInstalledBinaryPath))")
+        print("userInstalledWrapper: \(statusLine(path: Config.userInstalledWrapperPath))")
+        print("userHostManifest: \(manifestStatus(path: Config.userHostManifestPath, expectedName: Config.hostName, expectedExtensionID: expectedExtensionID, expectedWrapperPath: Config.userInstalledWrapperPath))")
+        print("userLegacyHostManifest: \(manifestStatus(path: Config.userLegacyHostManifestPath, expectedName: Config.legacyHostName, expectedExtensionID: expectedExtensionID, expectedWrapperPath: Config.userInstalledWrapperPath))")
+        print("systemInstalledBinary: \(statusLine(path: Config.systemInstalledBinaryPath))")
+        print("systemInstalledWrapper: \(statusLine(path: Config.systemInstalledWrapperPath))")
+        print("systemHostManifest: \(manifestStatus(path: Config.systemHostManifestPath, expectedName: Config.hostName, expectedExtensionID: expectedExtensionID, expectedWrapperPath: Config.systemInstalledWrapperPath))")
+        print("systemLegacyHostManifest: \(manifestStatus(path: Config.systemLegacyHostManifestPath, expectedName: Config.legacyHostName, expectedExtensionID: expectedExtensionID, expectedWrapperPath: Config.systemInstalledWrapperPath))")
         if options.checkKeychain {
             print("keychainAPIKey: \(keychainStatus())")
         } else {
@@ -431,7 +447,8 @@ private enum NativeHostDiagnostics {
         }
         print("logPath: \(Config.logPath)")
 
-        print("codesignCheck: codesign --verify --strict \(Config.installedBinaryPath.shellQuoted)")
+        print("userCodesignCheck: codesign --verify --strict \(Config.userInstalledBinaryPath.shellQuoted)")
+        print("systemCodesignCheck: codesign --verify --strict \(Config.systemInstalledBinaryPath.shellQuoted)")
     }
 
     private struct Options {
@@ -473,7 +490,7 @@ private enum NativeHostDiagnostics {
         return "present \(kind)\(executable) (\(path))"
     }
 
-    private static func manifestStatus(path: String, expectedName: String, expectedExtensionID: String?) -> String {
+    private static func manifestStatus(path: String, expectedName: String, expectedExtensionID: String?, expectedWrapperPath: String) -> String {
         guard FileManager.default.fileExists(atPath: path) else {
             return "missing (\(path))"
         }
@@ -492,7 +509,7 @@ private enum NativeHostDiagnostics {
 
             notes.append(name == expectedName ? "name ok" : "name \(name ?? "missing")")
             notes.append(type == "stdio" ? "type ok" : "type \(type ?? "missing")")
-            if hostPath == Config.installedWrapperPath {
+            if hostPath == expectedWrapperPath {
                 notes.append("path ok")
             } else {
                 notes.append("path \(hostPath ?? "missing")")

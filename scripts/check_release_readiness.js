@@ -65,6 +65,7 @@ checkReleaseDocs();
 checkWorkflows();
 checkChromeWebStoreWorkflow();
 checkDistributionSignals();
+checkNativeHostDiagnostics();
 checkAnnouncementAssets();
 collectManualBlockers();
 
@@ -376,6 +377,37 @@ function checkDistributionSignals() {
     if (!macosDoc.includes(requiredText)) {
       failures.push(`docs/MACOS_DISTRIBUTION.md must mention ${requiredText}`);
     }
+  }
+}
+
+function checkNativeHostDiagnostics() {
+  const nativeHost = readText("native-host/Sources/ImageOCRHost/main.swift");
+  const checkScript = readText("scripts/check.sh");
+  const releaseChecklist = readText("docs/RELEASE_CHECKLIST.md");
+
+  for (const requiredText of [
+    "userHostManifest",
+    "systemHostManifest",
+    "systemInstalledBinary",
+    "/Library/Google/Chrome/NativeMessagingHosts",
+    "/Library/Application Support/VisionClip"
+  ]) {
+    if (!nativeHost.includes(requiredText)) {
+      failures.push(`native host diagnostics must mention ${requiredText}`);
+    }
+  }
+
+  for (const requiredText of [
+    "userHostManifest:",
+    "systemHostManifest:"
+  ]) {
+    if (!checkScript.includes(requiredText)) {
+      failures.push(`scripts/check.sh must assert diagnose output contains ${requiredText}`);
+    }
+  }
+
+  if (!releaseChecklist.includes("system-wideのNative Messaging manifest")) {
+    failures.push("docs/RELEASE_CHECKLIST.md must require system-wide Native Messaging manifest diagnostics");
   }
 }
 

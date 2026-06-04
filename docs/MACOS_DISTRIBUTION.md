@@ -106,11 +106,23 @@ spctl --assess --type install --verbose=4 dist/visionclip-native-host-macos-<arc
 
 Native Messaging install後:
 
+ユーザー配下のzip install:
+
 ```sh
 "$HOME/Library/Application Support/VisionClip/image-ocr-host" version
 "$HOME/Library/Application Support/VisionClip/image-ocr-host" diagnose <Chrome拡張ID>
 "$HOME/Library/Application Support/VisionClip/image-ocr-host" check-key
 ```
+
+system-wide pkg install:
+
+```sh
+"/Library/Application Support/VisionClip/image-ocr-host" version
+"/Library/Application Support/VisionClip/image-ocr-host" diagnose <Chrome拡張ID>
+"/Library/Application Support/VisionClip/image-ocr-host" check-key
+```
+
+`diagnose` はユーザー配下とsystem-wideのbinary、wrapper、Native Messaging manifestを両方表示します。
 
 ## 正式配布前の残タスク
 

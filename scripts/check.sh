@@ -43,7 +43,9 @@ bash -n scripts/uninstall_native_host.sh
 
 swift build -c release --package-path native-host --build-path "$BUILD_DIR"
 "$BUILD_DIR/release/image-ocr-host" version >/dev/null
-"$BUILD_DIR/release/image-ocr-host" diagnose >/dev/null
+DIAGNOSE_OUTPUT="$("$BUILD_DIR/release/image-ocr-host" diagnose)"
+grep -q "userHostManifest:" <<<"$DIAGNOSE_OUTPUT"
+grep -q "systemHostManifest:" <<<"$DIAGNOSE_OUTPUT"
 node scripts/check_native_message.js "$BUILD_DIR/release/image-ocr-host"
 
 git diff --check

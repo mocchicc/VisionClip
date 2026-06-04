@@ -171,6 +171,12 @@ Chrome拡張が読み込まれているか確認してください。
 
 インストール済みbinary、wrapper、Chrome Native Messaging manifest、allowed origins、codesign確認コマンドを表示します。デフォルトではKeychainへアクセスしません。APIキーの有無も含めたい場合は、`--check-keychain` を付けるか、上の `check-key` を使ってください。APIキーの値やOCR結果は表示しません。
 
+`diagnose` はユーザー配下インストールとsystem-wide pkgインストールの両方を確認します。pkgでインストールした場合は、次のbinaryでも同じ診断を実行できます。
+
+```sh
+"/Library/Application Support/VisionClip/image-ocr-host" diagnose <Chrome拡張ID>
+```
+
 ### もう一度APIキーを入れ直したい
 
 Chrome右上の拡張ボタンから `VisionClip - Image OCR to Clipboard` を開き、`設定` を押して新しいAPIキーを保存してください。
