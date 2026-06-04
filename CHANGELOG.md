@@ -24,6 +24,7 @@ Initial public MVP release.
 - Release artifact verification, native messaging smoke tests, pkg allowed-origin checks, installer smoke tests, release preflight, release QA report generation, and version consistency checks.
 - Native host diagnostics for both user-level and system-wide installations.
 - Dependabot configuration for GitHub Actions and CodeQL analysis for extension JavaScript and native-host Swift.
+- Pull request template covering privacy, permissions, release impact, and verification checks.
 - Public project docs: README, privacy notice, permissions rationale, support, security, contributing, store listing draft, macOS distribution notes, and announcement drafts.
 
 ### Security and Privacy

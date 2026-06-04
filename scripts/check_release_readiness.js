@@ -31,6 +31,7 @@ const publicMarkdownFiles = [
 checkRequiredFiles([
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
+  ".github/pull_request_template.md",
   ".github/dependabot.yml",
   ".github/workflows/chrome-web-store.yml",
   ".github/workflows/codeql.yml",
@@ -64,6 +65,7 @@ checkMarkdownLinks();
 checkPermissionsDocs();
 checkPrivacyDocs();
 checkReleaseDocs();
+checkContributionDocs();
 checkWorkflows();
 checkGitHubMaintenance();
 checkChromeWebStoreWorkflow();
@@ -233,6 +235,35 @@ function checkReleaseDocs() {
   }
   if (!checkScript.includes("node --check scripts/generate_release_qa_report.js")) {
     failures.push("scripts/check.sh must syntax-check scripts/generate_release_qa_report.js");
+  }
+}
+
+function checkContributionDocs() {
+  const contributing = readText("CONTRIBUTING.md");
+  const pullRequestTemplate = readText(".github/pull_request_template.md");
+
+  for (const requiredText of [
+    ".github/pull_request_template.md",
+    "プライバシー、権限、APIキー保存への影響"
+  ]) {
+    if (!contributing.includes(requiredText)) {
+      failures.push(`CONTRIBUTING.md must mention ${requiredText}`);
+    }
+  }
+
+  for (const requiredText of [
+    "Privacy / security / permissions",
+    "No API keys",
+    "Chrome permissions",
+    "Native Messaging",
+    "macOS Keychain",
+    "Release impact",
+    "./scripts/package_release.sh",
+    "./scripts/check.sh"
+  ]) {
+    if (!pullRequestTemplate.includes(requiredText)) {
+      failures.push(`.github/pull_request_template.md must mention ${requiredText}`);
+    }
   }
 }
 

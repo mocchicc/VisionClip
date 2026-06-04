@@ -27,7 +27,7 @@ pull requestではGitHub ActionsのChecksとCodeQLも確認します。GitHub Ac
 
 ## PRの観点
 
-PRでは、次を短く書いてください。
+PRでは `.github/pull_request_template.md` に沿って、次を短く書いてください。
 
 - 何を変えたか
 - なぜ変えたか
