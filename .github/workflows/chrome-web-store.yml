@@ -1,0 +1,47 @@
+name: Chrome Web Store Upload
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Submit the uploaded draft for Chrome Web Store review"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: read
+
+jobs:
+  upload-extension:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run checks
+        run: ./scripts/check.sh
+
+      - name: Build release artifacts
+        run: ./scripts/package_release.sh
+
+      - name: Verify release artifacts
+        run: node scripts/check_release_package.js
+
+      - name: Upload extension draft
+        env:
+          CWS_PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+          CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+          CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+        run: |
+          EXTENSION_ZIP="$(ls dist/visionclip-extension-v*.zip | head -n 1)"
+          if [[ "${{ inputs.publish }}" == "true" ]]; then
+            ./scripts/upload_chrome_web_store.sh --zip "$EXTENSION_ZIP" --publish
+          else
+            ./scripts/upload_chrome_web_store.sh --zip "$EXTENSION_ZIP"
+          fi

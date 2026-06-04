@@ -18,6 +18,10 @@ Japanese
 
 英語圏向けに出す場合は、下のEnglish Listing Draftを使います。Chrome Web Store上のprimary languageは配布方針に合わせて選んでください。
 
+### Initial Visibility
+
+MVP段階では `unlisted` 公開を初期方針にします。macOS Native Messagingホストのinstaller/notarizationが整うまでは、検索流入を狙う一般公開ではなく、READMEや告知から理解して試せる人へURLを渡す運用に寄せます。
+
 ### Short Description
 
 Chrome上の画像や選択範囲をOCRし、抽出したテキストをmacOSのクリップボードへコピーします。
@@ -177,8 +181,30 @@ Reviewer向けに必要なら次を記載します。
 
 OpenAI APIキーはreviewer側で用意する必要があります。APIキーはmacOS Keychainに保存され、Chrome拡張には保存されません。
 
+## Upload Workflow
+
+Chrome Web Storeへのzip uploadは、手動実行のGitHub Actions workflowで行います。
+
+- workflow: `.github/workflows/chrome-web-store.yml`
+- upload script: `scripts/upload_chrome_web_store.sh`
+- default: draft upload only
+- `publish=true`: upload後にreviewへsubmit
+
+GitHub Secrets:
+
+- `CWS_PUBLISHER_ID`
+- `CWS_EXTENSION_ID`
+- `CWS_CLIENT_ID`
+- `CWS_CLIENT_SECRET`
+- `CWS_REFRESH_TOKEN`
+
+workflowは `./scripts/check.sh`、`./scripts/package_release.sh`、`node scripts/check_release_package.js` を通したextension zipだけをChrome Web Store API v2へ送ります。`publish=true` を選ばない限り、review submitは行いません。
+
+Chrome Web Store APIでpublishする前に、Developer Dashboard側でStore listingとPrivacyタブを埋めておく必要があります。visibilityをDeveloper Dashboardで手動変更した場合、そのvisibilityで一度手動publishしないとAPI publishできないことがあります。
+
 ## References
 
 - Chrome Web Store publishing flow: https://developer.chrome.com/docs/webstore/publish
+- Chrome Web Store API: https://developer.chrome.com/docs/webstore/using_webstore_api
 - Chrome Web Store program policies: https://developer.chrome.com/docs/webstore/program-policies/policies
 - Chrome Web Store image requirements: https://developer.chrome.com/docs/webstore/images

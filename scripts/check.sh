@@ -34,6 +34,7 @@ bash -n scripts/install_release_native_host.sh
 bash -n scripts/check_release_install.sh
 bash -n scripts/generate_store_screenshots.sh
 bash -n scripts/package_release.sh
+bash -n scripts/upload_chrome_web_store.sh
 bash -n scripts/uninstall_native_host.sh
 
 swift build -c release --package-path native-host --build-path "$BUILD_DIR"

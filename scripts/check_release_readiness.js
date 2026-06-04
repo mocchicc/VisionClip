@@ -31,6 +31,7 @@ const publicMarkdownFiles = [
 checkRequiredFiles([
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
+  ".github/workflows/chrome-web-store.yml",
   ".github/workflows/checks.yml",
   ".github/workflows/release-artifacts.yml",
   "CHANGELOG.md",
@@ -50,6 +51,7 @@ checkRequiredFiles([
   "scripts/package_release.sh",
   "scripts/check_release_package.js",
   "scripts/check_release_install.sh",
+  "scripts/upload_chrome_web_store.sh",
   ...storeScreenshotFiles
 ]);
 checkMarkdownLinks();
@@ -57,6 +59,7 @@ checkPermissionsDocs();
 checkPrivacyDocs();
 checkReleaseDocs();
 checkWorkflows();
+checkChromeWebStoreWorkflow();
 checkDistributionSignals();
 checkAnnouncementAssets();
 collectManualBlockers();
@@ -177,7 +180,8 @@ function checkReleaseDocs() {
   }
 
   for (const requiredText of [
-    "Chrome Web Store公開",
+    "Chrome Web Store",
+    "unlisted公開",
     "notarization",
     "GitHub Release",
     "実機表示"
@@ -222,6 +226,42 @@ function checkWorkflows() {
   ]) {
     if (!releaseWorkflow.includes(requiredText)) {
       failures.push(`.github/workflows/release-artifacts.yml must contain ${requiredText}`);
+    }
+  }
+}
+
+function checkChromeWebStoreWorkflow() {
+  const storeWorkflow = readText(".github/workflows/chrome-web-store.yml");
+  const uploadScript = readText("scripts/upload_chrome_web_store.sh");
+
+  for (const requiredText of [
+    "workflow_dispatch:",
+    "publish:",
+    "./scripts/check.sh",
+    "./scripts/package_release.sh",
+    "node scripts/check_release_package.js",
+    "./scripts/upload_chrome_web_store.sh",
+    "CWS_PUBLISHER_ID",
+    "CWS_EXTENSION_ID",
+    "CWS_CLIENT_ID",
+    "CWS_CLIENT_SECRET",
+    "CWS_REFRESH_TOKEN"
+  ]) {
+    if (!storeWorkflow.includes(requiredText)) {
+      failures.push(`.github/workflows/chrome-web-store.yml must contain ${requiredText}`);
+    }
+  }
+
+  for (const requiredText of [
+    "https://oauth2.googleapis.com/token",
+    "chromewebstore.googleapis.com/upload/v2",
+    "chromewebstore.googleapis.com/v2",
+    "--publish",
+    "CWS_REFRESH_TOKEN",
+    "Content-Type: application/zip"
+  ]) {
+    if (!uploadScript.includes(requiredText)) {
+      failures.push(`scripts/upload_chrome_web_store.sh must contain ${requiredText}`);
     }
   }
 }
