@@ -30,8 +30,10 @@ pkgだけを作る場合:
 
 ```sh
 ./scripts/package_native_host_pkg.sh bficjnhffakpmfcjbjjcanabccfldfhk
-./scripts/check_native_host_pkg.sh
+./scripts/check_native_host_pkg.sh bficjnhffakpmfcjbjjcanabccfldfhk
 ```
+
+`check_native_host_pkg.sh` はpayloadのファイル構成に加えて、system-wide manifestの `allowed_origins` に指定したChrome拡張IDが入っていることも確認します。
 
 ## 任意のcodesignとpkg署名
 

@@ -253,7 +253,10 @@ function checkChromeWebStoreWorkflow() {
     "./scripts/check.sh",
     "./scripts/package_release.sh",
     "node scripts/check_release_package.js",
+    "./scripts/check_native_host_pkg.sh",
     "./scripts/upload_chrome_web_store.sh",
+    "./scripts/check_release_preflight.sh --store-only --online",
+    "VISIONCLIP_RELEASE_EXTENSION_IDS",
     "CWS_PUBLISHER_ID",
     "CWS_EXTENSION_ID",
     "CWS_CLIENT_ID",
@@ -286,6 +289,7 @@ function checkChromeWebStoreWorkflow() {
     "CWS_CLIENT_SECRET",
     "CWS_REFRESH_TOKEN",
     "https://oauth2.googleapis.com/token",
+    "CWS_EXTENSION_ID is not included in VISIONCLIP_RELEASE_EXTENSION_IDS",
     "--store-only",
     "--online"
   ]) {
@@ -318,11 +322,16 @@ function checkDistributionSignals() {
     "xcrun notarytool",
     "xcrun stapler",
     "--macos-only",
+    "check_native_host_pkg.sh",
     "/Library/Google/Chrome/NativeMessagingHosts",
     "/Library/Application Support/VisionClip"
   ]) {
-    const source = requiredText === "--macos-only" ? readText("scripts/check_release_preflight.sh") : pkgScript;
-    const sourceLabel = requiredText === "--macos-only" ? "scripts/check_release_preflight.sh" : "scripts/package_native_host_pkg.sh";
+    const source = ["--macos-only", "check_native_host_pkg.sh"].includes(requiredText) ?
+      readText("scripts/check_release_preflight.sh") :
+      pkgScript;
+    const sourceLabel = ["--macos-only", "check_native_host_pkg.sh"].includes(requiredText) ?
+      "scripts/check_release_preflight.sh" :
+      "scripts/package_native_host_pkg.sh";
     if (!source.includes(requiredText)) {
       failures.push(`${sourceLabel} must contain ${requiredText}`);
     }

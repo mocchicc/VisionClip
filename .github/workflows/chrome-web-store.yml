@@ -26,10 +26,32 @@ jobs:
         run: ./scripts/check.sh
 
       - name: Build release artifacts
+        env:
+          VISIONCLIP_RELEASE_EXTENSION_IDS: ${{ secrets.CWS_EXTENSION_ID }}
         run: ./scripts/package_release.sh
 
       - name: Verify release artifacts
         run: node scripts/check_release_package.js
+
+      - name: Smoke test native host pkg
+        env:
+          CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+        run: |
+          if [[ -n "${CWS_EXTENSION_ID:-}" ]]; then
+            ./scripts/check_native_host_pkg.sh "$CWS_EXTENSION_ID"
+          else
+            ./scripts/check_native_host_pkg.sh
+          fi
+
+      - name: Preflight Chrome Web Store credentials
+        env:
+          CWS_PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+          CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+          CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+          VISIONCLIP_RELEASE_EXTENSION_IDS: ${{ secrets.CWS_EXTENSION_ID }}
+        run: ./scripts/check_release_preflight.sh --store-only --online
 
       - name: Upload extension draft
         env:

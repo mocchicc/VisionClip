@@ -20,8 +20,8 @@ Initial public MVP release.
 - Modal-friendly region OCR flow using a captured screenshot overlay.
 - Sample OCR fixture page and generated sample images under `samples/`.
 - Extension icon assets, social announcement images, and Chrome Web Store promotional image candidate.
-- Release packaging scripts for extension and macOS native host artifacts.
-- Release artifact verification, native messaging smoke tests, installer smoke tests, and version consistency checks.
+- Release packaging scripts for extension zip, macOS native host zip, and system-wide macOS native host pkg artifacts.
+- Release artifact verification, native messaging smoke tests, pkg allowed-origin checks, installer smoke tests, release preflight, and version consistency checks.
 - Public project docs: README, privacy notice, permissions rationale, support, security, contributing, store listing draft, macOS distribution notes, and announcement drafts.
 
 ### Security and Privacy
@@ -34,6 +34,6 @@ Initial public MVP release.
 ### Known Limitations
 
 - Distribution is still manual through GitHub and `Load unpacked`; Chrome Web Store distribution is not complete.
-- The macOS native host is not yet shipped as a signed/notarized installer.
+- The macOS native host pkg can be generated, but it is not yet shipped as a Developer ID signed/notarized installer.
 - Users need their own OpenAI API key.
 - Web pages with strict image loading behavior, login-only content, or dynamic modals may still need range OCR instead of direct image OCR.

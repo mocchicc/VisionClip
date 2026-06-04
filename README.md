@@ -283,7 +283,7 @@ macOS Native Messagingホストのpkgは、release artifact作成時に `dist/vi
 
 ## リリース用artifact作成
 
-Chrome拡張zip、macOS Native Messagingホストzip、SHA-256 checksumを `dist/` に作成できます。
+Chrome拡張zip、macOS Native Messagingホストzip、macOS Native Messagingホストpkg、SHA-256 checksumを `dist/` に作成できます。
 
 ```sh
 ./scripts/package_release.sh
@@ -299,6 +299,7 @@ Chrome Web StoreとmacOS署名/notarizationの資格情報をrelease前にまと
 
 ```sh
 node scripts/check_release_package.js
+./scripts/check_native_host_pkg.sh bficjnhffakpmfcjbjjcanabccfldfhk
 ```
 
 release zip内の `install_native_host.sh` が一時HOMEへ正しくインストールできるか確認する場合は、次を実行します。

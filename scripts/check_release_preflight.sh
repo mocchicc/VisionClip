@@ -6,6 +6,7 @@ CHECK_STORE=true
 CHECK_MACOS=true
 ONLINE=false
 FAILURES=()
+DEFAULT_EXTENSION_ID="bficjnhffakpmfcjbjjcanabccfldfhk"
 
 usage() {
   cat <<'USAGE'
@@ -79,6 +80,23 @@ require_env() {
   return 0
 }
 
+release_extension_ids() {
+  local ids="${VISIONCLIP_RELEASE_EXTENSION_IDS:-$DEFAULT_EXTENSION_ID}"
+  read -r -a RELEASE_EXTENSION_ID_ARGS <<< "$ids"
+}
+
+array_contains() {
+  local needle="$1"
+  shift
+  local item
+  for item in "$@"; do
+    if [[ "$item" == "$needle" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 print_present_env() {
   local env_name="$1"
   if [[ -n "${!env_name:-}" ]]; then
@@ -110,6 +128,12 @@ check_store() {
     fail "CWS_EXTENSION_ID must be a 32-character Chrome extension ID."
   fi
 
+  release_extension_ids
+  if [[ -n "${CWS_EXTENSION_ID:-}" ]] &&
+      ! array_contains "$CWS_EXTENSION_ID" "${RELEASE_EXTENSION_ID_ARGS[@]}"; then
+    fail "CWS_EXTENSION_ID is not included in VISIONCLIP_RELEASE_EXTENSION_IDS. Native Messaging pkg would not allow this Store extension ID."
+  fi
+
   if [[ "$ONLINE" == true && "$missing_env" == false ]]; then
     echo "  online OAuth check: running"
     local token_response
@@ -132,6 +156,8 @@ check_store() {
 check_macos() {
   echo "macOS distribution preflight:"
   require_command codesign
+  require_command cpio
+  require_command gzip
   require_command pkgbuild
   require_command pkgutil
   require_command productsign
@@ -143,6 +169,14 @@ check_macos() {
   native_pkg="$(find "$ROOT_DIR/dist" -maxdepth 1 -name 'visionclip-native-host-macos-*-v*.pkg' -print -quit 2>/dev/null || true)"
   if [[ -z "$native_pkg" ]]; then
     fail "Missing native host pkg in dist/. Run ./scripts/package_release.sh first."
+  fi
+
+  release_extension_ids
+  if [[ -n "$native_pkg" ]]; then
+    local pkg_check_output
+    if ! pkg_check_output="$("$ROOT_DIR/scripts/check_native_host_pkg.sh" "${RELEASE_EXTENSION_ID_ARGS[@]}" 2>&1)"; then
+      fail "Native host pkg allowed origins check failed: $pkg_check_output"
+    fi
   fi
 
   for env_name in VISIONCLIP_CODESIGN_IDENTITY VISIONCLIP_PKG_SIGN_IDENTITY VISIONCLIP_NOTARY_PROFILE; do
