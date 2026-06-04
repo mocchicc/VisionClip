@@ -43,6 +43,7 @@ checkRequiredFiles([
   "SUPPORT.md",
   "docs/ANNOUNCEMENT.md",
   "docs/CHROME_PERMISSIONS.md",
+  "docs/LICENSE_DECISION.md",
   "docs/MACOS_DISTRIBUTION.md",
   "docs/PRIVACY.md",
   "docs/RELEASE_CHECKLIST.md",
@@ -200,6 +201,7 @@ function checkPrivacyDocs() {
 
 function checkReleaseDocs() {
   const readme = readText("README.md");
+  const licenseDecision = readText("docs/LICENSE_DECISION.md");
   const releaseChecklist = readText("docs/RELEASE_CHECKLIST.md");
   const releaseRunbook = readText("docs/RELEASE_RUNBOOK.md");
 
@@ -210,6 +212,7 @@ function checkReleaseDocs() {
     "node scripts/generate_release_qa_report.js",
     "./scripts/check_release_preflight.sh",
     "./scripts/check_release_install.sh",
+    "docs/LICENSE_DECISION.md",
     "docs/RELEASE_CHECKLIST.md",
     "docs/RELEASE_RUNBOOK.md"
   ]) {
@@ -219,6 +222,7 @@ function checkReleaseDocs() {
   }
 
   for (const requiredText of [
+    "LICENSE_DECISION.md",
     "Chrome Web Store",
     "unlisted公開",
     "notarization",
@@ -230,6 +234,19 @@ function checkReleaseDocs() {
   ]) {
     if (!releaseChecklist.includes(requiredText)) {
       failures.push(`docs/RELEASE_CHECKLIST.md must keep manual release blocker: ${requiredText}`);
+    }
+  }
+
+  for (const requiredText of [
+    "MIT License",
+    "Apache-2.0",
+    "LICENSE",
+    "./scripts/check.sh",
+    "node scripts/check_release_package.js",
+    "node scripts/check_release_readiness.js --strict"
+  ]) {
+    if (!licenseDecision.includes(requiredText)) {
+      failures.push(`docs/LICENSE_DECISION.md must mention license decision detail: ${requiredText}`);
     }
   }
 

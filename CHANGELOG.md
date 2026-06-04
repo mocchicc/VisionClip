@@ -23,6 +23,7 @@ Initial public MVP release.
 - Release packaging scripts for extension zip, macOS native host zip, and system-wide macOS native host pkg artifacts.
 - Release artifact verification, native messaging smoke tests, pkg allowed-origin checks, installer smoke tests, release preflight, release QA report generation, and version consistency checks.
 - Release runbook covering version updates, release gates, artifact verification, Chrome Web Store preflight, macOS signing/notarization, GitHub Release creation, final smoke, and rollback.
+- License decision memo for choosing and applying a release license before broader distribution.
 - Native host diagnostics for both user-level and system-wide installations.
 - Dependabot configuration for GitHub Actions and CodeQL analysis for extension JavaScript and native-host Swift.
 - Pull request template covering privacy, permissions, release impact, and verification checks.

@@ -58,6 +58,7 @@ requireEntries(nativeEntries, [
   `${nativeRoot}/CONTRIBUTING.md`,
   `${nativeRoot}/docs/PRIVACY.md`,
   `${nativeRoot}/docs/CHROME_PERMISSIONS.md`,
+  `${nativeRoot}/docs/LICENSE_DECISION.md`,
   `${nativeRoot}/docs/RELEASE_CHECKLIST.md`,
   `${nativeRoot}/docs/RELEASE_RUNBOOK.md`,
   `${nativeRoot}/docs/STORE_LISTING.md`,

@@ -226,6 +226,8 @@ APIキーも消したい場合は、先に次を実行します。
 
 現時点ではライセンス未決定です。オープンソースとして再利用可能にする場合は、公開前に `LICENSE` を追加してください。ライセンスが追加されるまでは、READMEや告知文では「公開MVP」「公開repo」として扱います。
 
+判断メモは [docs/LICENSE_DECISION.md](docs/LICENSE_DECISION.md) に置いています。
+
 ## 貢献・サポート
 
 不具合報告や機能提案はGitHub Issuesで受け付けます。APIキー、機密画像、個人情報を含むOCR結果は公開issueへ載せないでください。
@@ -234,6 +236,7 @@ APIキーも消したい場合は、先に次を実行します。
 - セキュリティ報告: [SECURITY.md](SECURITY.md)
 - 開発への参加: [CONTRIBUTING.md](CONTRIBUTING.md)
 - 変更履歴: [CHANGELOG.md](CHANGELOG.md)
+- ライセンス判断メモ: [docs/LICENSE_DECISION.md](docs/LICENSE_DECISION.md)
 - リリース手順: [docs/RELEASE_RUNBOOK.md](docs/RELEASE_RUNBOOK.md)
 - Chrome Web Store提出用メモ: [docs/STORE_LISTING.md](docs/STORE_LISTING.md)
 - macOS配布メモ: [docs/MACOS_DISTRIBUTION.md](docs/MACOS_DISTRIBUTION.md)

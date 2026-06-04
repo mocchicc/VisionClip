@@ -24,6 +24,7 @@ const requiredDocs = [
   "CONTRIBUTING.md",
   "docs/PRIVACY.md",
   "docs/CHROME_PERMISSIONS.md",
+  "docs/LICENSE_DECISION.md",
   "docs/STORE_LISTING.md",
   "docs/MACOS_DISTRIBUTION.md",
   "docs/RELEASE_CHECKLIST.md",
