@@ -45,8 +45,6 @@ VisionClipは、ユーザーがOCRを開始したタイミングで `activeTab` 
 
 content scriptはOCRを自動実行しません。OCRはユーザーが右クリックメニュー、popup、またはショートカットから開始したときだけ実行されます。
 
-## 今後の権限削減候補
+## Chrome Web Store提出時
 
-一般公開前に、次を検討します。
-
-- Chrome Web Store提出時の権限説明文をこの文書から作成する
+Chrome Web Store提出時の権限説明文は、この文書と [STORE_LISTING.md](./STORE_LISTING.md) の `Permission Justification` を一致させます。manifestの権限を変更した場合は、両方を更新してください。

@@ -150,6 +150,8 @@ function checkPermissionsDocs() {
 
 function checkPrivacyDocs() {
   const privacyDoc = readText("docs/PRIVACY.md");
+  const storeListing = readText("docs/STORE_LISTING.md");
+
   for (const requiredText of [
     "OpenAI API",
     "macOS Keychain",
@@ -158,10 +160,32 @@ function checkPrivacyDocs() {
     "OCR履歴をpopupに保存する",
     "analytics",
     "clear-key",
-    "uninstall_native_host.sh"
+    "uninstall_native_host.sh",
+    "HTTPS",
+    "Chrome Web Store Limited Use Statement",
+    "広告",
+    "行動ターゲティング",
+    "独自サーバーでOCR対象画像、OCR結果、APIキー、閲覧履歴を収集・保存しません"
   ]) {
     if (!privacyDoc.includes(requiredText)) {
       failures.push(`docs/PRIVACY.md must mention ${requiredText}`);
+    }
+  }
+
+  for (const requiredText of [
+    "Privacy Policy URL",
+    "https://github.com/mocchicc/VisionClip/blob/main/docs/PRIVACY.md",
+    "Privacy Tab Draft",
+    "Single purpose",
+    "User data usage",
+    "Limited Use",
+    "Website content",
+    "Authentication information",
+    "OpenAI APIへHTTPSで送信",
+    "Chrome local storage"
+  ]) {
+    if (!storeListing.includes(requiredText)) {
+      failures.push(`docs/STORE_LISTING.md must mention privacy submission detail: ${requiredText}`);
     }
   }
 }
