@@ -1,25 +1,37 @@
-document.addEventListener(
-  "contextmenu",
-  async (event) => {
-    const image = event.target?.closest?.("img");
-    if (!image) {
-      return;
-    }
+(() => {
+if (globalThis.__visionclipContextMenuHandler) {
+  document.removeEventListener("contextmenu", globalThis.__visionclipContextMenuHandler, true);
+}
 
-    const imageUrl = image.currentSrc || image.src;
-    const imageDataUrl = await tryCanvasCapture(image);
+if (globalThis.__visionclipMessageHandler) {
+  try {
+    chrome.runtime.onMessage.removeListener(globalThis.__visionclipMessageHandler);
+  } catch {
+    // The previous listener may belong to an invalidated extension context.
+  }
+}
 
-    sendRuntimeMessageSafely({
-      type: "remember_context_image",
-      imageUrl,
-      imageDataUrl
-    });
-  },
-  true
-);
+const onContextMenu = async (event) => {
+  const image = event.target?.closest?.("img");
+  if (!image) {
+    return;
+  }
+
+  const imageUrl = image.currentSrc || image.src;
+  const imageDataUrl = await tryCanvasCapture(image);
+
+  sendRuntimeMessageSafely({
+    type: "remember_context_image",
+    imageUrl,
+    imageDataUrl
+  });
+};
+
+document.addEventListener("contextmenu", onContextMenu, true);
+globalThis.__visionclipContextMenuHandler = onContextMenu;
 
 try {
-  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  const onRuntimeMessage = (message, _sender, sendResponse) => {
     if (message?.type === "show_ocr_toast") {
       showOCRToast(message.title, message.message, message.level);
       return;
@@ -34,7 +46,20 @@ try {
         }));
       return true;
     }
-  });
+
+    if (message?.type === "capture_image_by_url") {
+      captureImageByUrl(message.imageUrl)
+        .then(sendResponse)
+        .catch((error) => sendResponse({
+          ok: false,
+          error: error?.message || String(error)
+        }));
+      return true;
+    }
+  };
+
+  chrome.runtime.onMessage.addListener(onRuntimeMessage);
+  globalThis.__visionclipMessageHandler = onRuntimeMessage;
 } catch {
   // The old content script can outlive an extension reload on the current page.
 }
@@ -75,6 +100,48 @@ async function tryCanvasCapture(image) {
     return canvas.toDataURL("image/png");
   } catch {
     return null;
+  }
+}
+
+async function captureImageByUrl(imageUrl) {
+  const image = findImageByUrl(imageUrl);
+  if (!image) {
+    return { ok: false, imageDataUrl: null };
+  }
+
+  return {
+    ok: true,
+    imageUrl: image.currentSrc || image.src || imageUrl,
+    imageDataUrl: await tryCanvasCapture(image)
+  };
+}
+
+function findImageByUrl(imageUrl) {
+  const normalizedTarget = normalizeImageUrl(imageUrl);
+  for (const image of document.images) {
+    const candidates = [
+      image.currentSrc,
+      image.src,
+      image.getAttribute("src")
+    ].map(normalizeImageUrl);
+
+    if (candidates.includes(normalizedTarget)) {
+      return image;
+    }
+  }
+
+  return null;
+}
+
+function normalizeImageUrl(value) {
+  if (!value) {
+    return "";
+  }
+
+  try {
+    return new URL(value, document.baseURI).href;
+  } catch {
+    return value;
   }
 }
 
@@ -379,3 +446,4 @@ function loadImage(src) {
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
+})();

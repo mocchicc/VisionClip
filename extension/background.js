@@ -194,6 +194,8 @@ async function startRegionOCR(targetTab = null) {
     updatedAt: startedAt
   });
 
+  await ensureContentScript(tab.id);
+
   const screenshotDataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, {
     format: "png"
   });
@@ -359,11 +361,12 @@ async function getSelectedModel() {
 
 async function buildOCRPayload(info, tab) {
   const srcUrl = info.srcUrl || "";
+  const captured = await captureImageFromTab(tab?.id, srcUrl);
   const remembered = getRecentContextImage(tab?.id, srcUrl);
   const payload = {
     type: "ocr_image",
-    imageUrl: remembered?.imageUrl || srcUrl,
-    imageDataUrl: remembered?.imageDataUrl,
+    imageUrl: captured?.imageUrl || remembered?.imageUrl || srcUrl,
+    imageDataUrl: captured?.imageDataUrl || remembered?.imageDataUrl,
     pageUrl: info.pageUrl,
     tabTitle: tab?.title,
     model: await getSelectedModel()
@@ -374,6 +377,38 @@ async function buildOCRPayload(info, tab) {
   }
 
   return payload;
+}
+
+async function captureImageFromTab(tabId, imageUrl) {
+  if (tabId == null || !imageUrl) {
+    return null;
+  }
+
+  try {
+    await ensureContentScript(tabId);
+    const response = await chrome.tabs.sendMessage(tabId, {
+      type: "capture_image_by_url",
+      imageUrl
+    });
+
+    if (!response?.ok) {
+      return null;
+    }
+
+    return {
+      imageUrl: response.imageUrl || imageUrl,
+      imageDataUrl: response.imageDataUrl || null
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function ensureContentScript(tabId) {
+  await chrome.scripting.executeScript({
+    target: { tabId },
+    files: ["content.js"]
+  });
 }
 
 function getRecentContextImage(tabId, srcUrl) {

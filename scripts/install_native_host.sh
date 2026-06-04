@@ -79,5 +79,9 @@ echo "  $HOST_WRAPPER"
 echo "  $HOST_MANIFEST"
 echo "  $LEGACY_HOST_MANIFEST"
 echo
+echo "Verification:"
+echo "  version: $("$HOST_BINARY" version)"
+"$HOST_BINARY" diagnose "${EXTENSION_IDS[0]}"
+echo
 echo "Next:"
 echo "  \"$HOST_BINARY\" set-key"

@@ -11,6 +11,9 @@ NATIVE_PACKAGE_DIR="$WORK_DIR/visionclip-native-host-macos-$ARCH-v$VERSION"
 EXTENSION_ZIP="$DIST_DIR/visionclip-extension-v$VERSION.zip"
 NATIVE_ZIP="$DIST_DIR/visionclip-native-host-macos-$ARCH-v$VERSION.zip"
 CHECKSUMS_FILE="$DIST_DIR/checksums-v$VERSION.txt"
+CODESIGN_IDENTITY="${VISIONCLIP_CODESIGN_IDENTITY:-}"
+RELEASE_EXTENSION_IDS="${VISIONCLIP_RELEASE_EXTENSION_IDS:-bficjnhffakpmfcjbjjcanabccfldfhk}"
+SIGNING_STATUS="unsigned"
 
 trap 'rm -rf "$WORK_DIR"' EXIT
 
@@ -30,10 +33,30 @@ cp "$BUILD_DIR/release/image-ocr-host" "$NATIVE_PACKAGE_DIR/image-ocr-host"
 cp "$ROOT_DIR/scripts/install_release_native_host.sh" "$NATIVE_PACKAGE_DIR/install_native_host.sh"
 cp "$ROOT_DIR/scripts/uninstall_native_host.sh" "$NATIVE_PACKAGE_DIR/uninstall_native_host.sh"
 cp "$ROOT_DIR/README.md" "$NATIVE_PACKAGE_DIR/README.md"
+cp "$ROOT_DIR/CHANGELOG.md" "$NATIVE_PACKAGE_DIR/CHANGELOG.md"
+cp "$ROOT_DIR/SECURITY.md" "$NATIVE_PACKAGE_DIR/SECURITY.md"
+cp "$ROOT_DIR/SUPPORT.md" "$NATIVE_PACKAGE_DIR/SUPPORT.md"
+cp "$ROOT_DIR/CONTRIBUTING.md" "$NATIVE_PACKAGE_DIR/CONTRIBUTING.md"
+for LICENSE_FILE in LICENSE LICENSE.md LICENCE COPYING; do
+  if [[ -f "$ROOT_DIR/$LICENSE_FILE" ]]; then
+    cp "$ROOT_DIR/$LICENSE_FILE" "$NATIVE_PACKAGE_DIR/$LICENSE_FILE"
+    break
+  fi
+done
 cp -R "$ROOT_DIR/docs" "$NATIVE_PACKAGE_DIR/docs"
+cp -R "$ROOT_DIR/samples" "$NATIVE_PACKAGE_DIR/samples"
+mkdir -p "$NATIVE_PACKAGE_DIR/assets"
+cp -R "$ROOT_DIR/assets/social" "$NATIVE_PACKAGE_DIR/assets/social"
+cp -R "$ROOT_DIR/assets/store" "$NATIVE_PACKAGE_DIR/assets/store"
 chmod 755 "$NATIVE_PACKAGE_DIR/image-ocr-host"
 chmod 755 "$NATIVE_PACKAGE_DIR/install_native_host.sh"
 chmod 755 "$NATIVE_PACKAGE_DIR/uninstall_native_host.sh"
+
+if [[ -n "$CODESIGN_IDENTITY" ]]; then
+  codesign --force --timestamp --options runtime --sign "$CODESIGN_IDENTITY" "$NATIVE_PACKAGE_DIR/image-ocr-host"
+  codesign --verify --strict --verbose=2 "$NATIVE_PACKAGE_DIR/image-ocr-host"
+  SIGNING_STATUS="signed with $CODESIGN_IDENTITY"
+fi
 
 (
   cd "$WORK_DIR"
@@ -45,7 +68,12 @@ chmod 755 "$NATIVE_PACKAGE_DIR/uninstall_native_host.sh"
   shasum -a 256 "$(basename "$EXTENSION_ZIP")" "$(basename "$NATIVE_ZIP")" > "$(basename "$CHECKSUMS_FILE")"
 )
 
+read -r -a RELEASE_EXTENSION_ID_ARGS <<< "$RELEASE_EXTENSION_IDS"
+"$ROOT_DIR/scripts/package_native_host_pkg.sh" "${RELEASE_EXTENSION_ID_ARGS[@]}"
+
 echo "Created release artifacts:"
 echo "  $EXTENSION_ZIP"
 echo "  $NATIVE_ZIP"
+echo "  $DIST_DIR/visionclip-native-host-macos-$ARCH-v$VERSION.pkg"
 echo "  $CHECKSUMS_FILE"
+echo "Native host signing: $SIGNING_STATUS"

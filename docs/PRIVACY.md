@@ -51,6 +51,17 @@ VisionClipは次を保存しません。
 
 VisionClipはOCR処理にOpenAI APIを利用します。OpenAI APIキー、送信画像、OCR結果の取り扱いは、ユーザーが利用するOpenAI APIの契約・ポリシーにも従います。
 
+OpenAI APIへの送信はHTTPSで行います。Chrome拡張とmacOS Native Messagingホストの間の通信は同じMac上のローカル通信です。
+
+## Chrome Web Store Limited Use Statement
+
+VisionClipが扱うユーザーデータは、ユーザーが明示的に開始したOCRとクリップボードコピー機能を提供する目的に限定して使用します。
+
+- OCR対象画像、選択範囲スクリーンショット、OCR結果、APIキーを広告、行動ターゲティング、信用判断、販売、またはVisionClipの単一目的と関係しない用途に使用しません。
+- VisionClipの開発者は、独自サーバーでOCR対象画像、OCR結果、APIキー、閲覧履歴を収集・保存しません。
+- VisionClipの開発者は、OCR対象画像やOCR結果を人間が読む運用を行いません。サポート時にユーザーが任意で共有した情報だけを、問い合わせ対応に必要な範囲で確認します。
+- OCRのためにOpenAI APIへ画像または選択範囲スクリーンショットを送信します。この送信は、ユーザーが開始したOCR機能を提供するために必要な範囲に限定します。
+
 ## 権限の考え方
 
 VisionClipは、画像右クリックOCR、画面範囲OCR、Native Messaging、クリップボードコピーのためにChrome拡張権限を使用します。権限ごとの理由は [CHROME_PERMISSIONS.md](./CHROME_PERMISSIONS.md) を参照してください。

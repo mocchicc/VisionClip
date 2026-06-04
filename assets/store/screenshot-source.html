@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisionClip Store Screenshot Source</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --ink: #121826;
+      --muted: #627084;
+      --line: #d8e1ec;
+      --panel: #ffffff;
+      --navy: #0f1f33;
+      --teal: #1fb8a6;
+      --amber: #d99021;
+      --green: #12805c;
+      --shadow: 0 24px 64px rgba(17, 30, 48, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 1280px;
+      height: 800px;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    body {
+      display: grid;
+      place-items: stretch;
+    }
+
+    .shot {
+      position: relative;
+      width: 1280px;
+      height: 800px;
+      padding: 42px;
+      background:
+        linear-gradient(145deg, rgba(31, 184, 166, 0.18), transparent 34%),
+        linear-gradient(315deg, rgba(217, 144, 33, 0.18), transparent 34%),
+        var(--bg);
+    }
+
+    .headline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 26px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .brand img {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      box-shadow: 0 14px 28px rgba(15, 31, 51, 0.18);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.1;
+    }
+
+    .brand p,
+    .caption p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 8px 13px;
+      border: 1px solid rgba(31, 184, 166, 0.36);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: #0a6f64;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 26px;
+      align-items: stretch;
+      height: 632px;
+    }
+
+    .layout.wide {
+      grid-template-columns: 1fr;
+    }
+
+    .browser,
+    .panel {
+      overflow: hidden;
+      border: 1px solid rgba(111, 128, 149, 0.28);
+      border-radius: 12px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .browser {
+      display: grid;
+      grid-template-rows: 48px 1fr;
+      min-width: 0;
+    }
+
+    .browser-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 15px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ef6b60;
+    }
+
+    .dot:nth-child(2) {
+      background: #f1bb43;
+    }
+
+    .dot:nth-child(3) {
+      background: #5bc56c;
+    }
+
+    .address {
+      flex: 1;
+      min-width: 0;
+      height: 26px;
+      margin-left: 8px;
+      border-radius: 999px;
+      background: #e9eef5;
+    }
+
+    .page {
+      position: relative;
+      padding: 24px;
+      background: #eef3f8;
+    }
+
+    .sample-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 270px;
+      gap: 22px;
+      height: 100%;
+      padding: 22px;
+      border-radius: 10px;
+      background: #ffffff;
+      box-shadow: inset 0 0 0 1px #e4ebf3;
+    }
+
+    .sample-image-wrap {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #dce5ef;
+      border-radius: 9px;
+      background: #e7edf5;
+    }
+
+    .sample-image-wrap img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .side-copy {
+      display: grid;
+      align-content: center;
+      gap: 14px;
+    }
+
+    .side-copy h2,
+    .caption h2 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .side-copy p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .selection {
+      position: absolute;
+      border: 4px solid var(--teal);
+      border-radius: 8px;
+      background: rgba(31, 184, 166, 0.16);
+      box-shadow: 0 0 0 999px rgba(15, 31, 51, 0.10);
+    }
+
+    .selection::before,
+    .selection::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 4px solid var(--teal);
+    }
+
+    .selection::before {
+      left: -12px;
+      top: -12px;
+    }
+
+    .selection::after {
+      right: -12px;
+      bottom: -12px;
+    }
+
+    .context-menu {
+      position: absolute;
+      left: 118px;
+      top: 284px;
+      width: 270px;
+      padding: 8px;
+      border: 1px solid #cfd9e6;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 20px 45px rgba(15, 31, 51, 0.22);
+      font-size: 15px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 11px;
+      border-radius: 6px;
+    }
+
+    .menu-item.active {
+      background: #e8fbf7;
+      color: #0a6f64;
+      font-weight: 700;
+    }
+
+    .result-chip {
+      position: absolute;
+      right: 28px;
+      bottom: 26px;
+      width: 330px;
+      padding: 16px;
+      border: 1px solid #d9e2ec;
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: 0 18px 40px rgba(15, 31, 51, 0.18);
+    }
+
+    .result-chip strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--green);
+      font-size: 15px;
+    }
+
+    .result-chip p {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    .panel {
+      display: grid;
+      align-content: center;
+      padding: 28px;
+    }
+
+    .caption {
+      display: grid;
+      gap: 14px;
+    }
+
+    .caption ul {
+      display: grid;
+      gap: 10px;
+      margin: 6px 0 0;
+      padding: 0;
+      list-style: none;
+      color: #263245;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .caption li::before {
+      content: "✓";
+      margin-right: 9px;
+      color: var(--teal);
+      font-weight: 900;
+    }
+
+    .popup {
+      width: 360px;
+      border: 1px solid #d9e2ec;
+      border-radius: 12px;
+      background: #f8fafc;
+      box-shadow: 0 24px 56px rgba(15, 31, 51, 0.22);
+      padding: 14px;
+      color: #111827;
+    }
+
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .popup h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .popup small {
+      display: block;
+      margin-top: 3px;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .tiny-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tiny-button,
+    .primary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      padding: 6px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      background: #ffffff;
+      font-size: 12px;
+    }
+
+    .primary-button {
+      width: 100%;
+      margin-bottom: 10px;
+      background: #111827;
+      border-color: #111827;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .status-card {
+      padding: 12px;
+      margin-bottom: 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .status-row span {
+      color: #64748b;
+    }
+
+    .status-row strong {
+      color: #15803d;
+    }
+
+    .message {
+      padding-top: 10px;
+      border-top: 1px solid #e2e8f0;
+      color: #334155;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .history-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .history-item {
+      margin-top: 8px;
+      padding: 10px;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #16a34a;
+      border-radius: 8px;
+      background: #ffffff;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .usage {
+      margin-top: 6px;
+      color: #64748b;
+      font-size: 10px;
+    }
+
+    .options {
+      width: 620px;
+      padding: 28px;
+      border: 1px solid #d9e2ec;
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: 0 24px 56px rgba(15, 31, 51, 0.22);
+    }
+
+    .options h2 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .options p {
+      margin: 8px 0 22px;
+      color: #64748b;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .input,
+    .select {
+      height: 42px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .input {
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      color: #64748b;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .select {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-weight: 700;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 9px;
+      background: #f8fafc;
+    }
+
+    .toggle {
+      width: 48px;
+      height: 26px;
+      border-radius: 999px;
+      background: #111827;
+      padding: 3px;
+    }
+
+    .toggle::after {
+      content: "";
+      display: block;
+      width: 20px;
+      height: 20px;
+      margin-left: auto;
+      border-radius: 50%;
+      background: #ffffff;
+    }
+
+    .modal-shell {
+      position: absolute;
+      inset: 96px 150px 54px;
+      display: grid;
+      grid-template-rows: 54px 1fr;
+      overflow: hidden;
+      border: 1px solid #d8e1ec;
+      border-radius: 13px;
+      background: #ffffff;
+      box-shadow: 0 28px 68px rgba(15, 31, 51, 0.26);
+    }
+
+    .modal-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid #e2e8f0;
+      font-weight: 800;
+    }
+
+    .modal-content {
+      position: relative;
+      padding: 24px;
+      background: #eef3f8;
+    }
+
+    .modal-content img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 9px;
+    }
+
+    .kbd {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 13px;
+      border-radius: 10px;
+      background: #111827;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 800;
+      box-shadow: 0 16px 32px rgba(15, 31, 51, 0.24);
+    }
+
+    .kbd span {
+      padding: 4px 7px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.14);
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    const sample = "../../samples/ocr-sample-01-dashboard.png";
+    const receipts = "../../samples/ocr-sample-02-receipts-labels.png";
+    const whiteboard = "../../samples/ocr-sample-03-whiteboard-notes.png";
+    const icon = "../../extension/icons/icon-128.png";
+
+    const shots = {
+      "01-image-context": renderImageContext,
+      "02-region-ocr": renderRegionOcr,
+      "03-popup-history": renderPopupHistory,
+      "04-options-keychain": renderOptionsKeychain,
+      "05-modal-shortcut": renderModalShortcut
+    };
+
+    const shotName = new URL(window.location.href).searchParams.get("shot") || "01-image-context";
+    document.getElementById("app").innerHTML = (shots[shotName] || renderImageContext)();
+
+    function shell(title, subtitle, badge, body) {
+      return `
+        <section class="shot">
+          <div class="headline">
+            <div class="brand">
+              <img src="${icon}" alt="">
+              <div>
+                <h1>${title}</h1>
+                <p>${subtitle}</p>
+              </div>
+            </div>
+            <div class="badge">${badge}</div>
+          </div>
+          ${body}
+        </section>
+      `;
+    }
+
+    function browserFrame(content) {
+      return `
+        <div class="browser">
+          <div class="browser-bar">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <div class="address"></div>
+          </div>
+          <div class="page">${content}</div>
+        </div>
+      `;
+    }
+
+    function renderImageContext() {
+      return shell(
+        "Right-click image OCR",
+        "画像を右クリックして、読み取った文字をそのままクリップボードへ。",
+        "Image OCR → Clipboard",
+        `
+          <div class="layout">
+            ${browserFrame(`
+              <div class="sample-card">
+                <div class="sample-image-wrap">
+                  <img src="${sample}" alt="">
+                </div>
+                <div class="side-copy">
+                  <h2>画像の中の文字をコピー可能に</h2>
+                  <p>サンプル画像や業務画面のスクリーンショットから、必要な文字だけOCRできます。</p>
+                </div>
+              </div>
+              <div class="context-menu">
+                <div class="menu-item">画像を新しいタブで開く</div>
+                <div class="menu-item active">この画像をOCRする</div>
+                <div class="menu-item">この画面の範囲をOCRする</div>
+              </div>
+              <div class="result-chip">
+                <strong>Copied to clipboard</strong>
+                <p>読み取ったテキストをすぐ貼り付けられます。</p>
+              </div>
+            `)}
+            <aside class="panel">
+              <div class="caption">
+                <h2>画像右クリックから即OCR</h2>
+                <p>Webページ上の画像を選び、OpenAI APIで文字抽出。結果はmacOSクリップボードへ入ります。</p>
+                <ul>
+                  <li>PNG / JPEG / WEBP / GIFに対応</li>
+                  <li>APIキーはmacOS Keychainに保存</li>
+                  <li>Chrome拡張にはキーを保存しません</li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        `
+      );
+    }
+
+    function renderRegionOcr() {
+      return shell(
+        "Select any visible region",
+        "ページ上の必要な範囲だけをドラッグしてOCRできます。",
+        "Region OCR",
+        `
+          <div class="layout">
+            ${browserFrame(`
+              <div class="sample-card">
+                <div class="sample-image-wrap">
+                  <img src="${receipts}" alt="">
+                  <div class="selection" style="left: 54px; top: 92px; width: 430px; height: 280px;"></div>
+                </div>
+                <div class="side-copy">
+                  <h2>必要なところだけ選択</h2>
+                  <p>レシート、ラベル、UIの一部など、ページ全体ではなく選んだ範囲だけ送信します。</p>
+                </div>
+              </div>
+            `)}
+            <aside class="panel">
+              <div class="caption">
+                <h2>画面範囲をOCR</h2>
+                <p>popup、右クリックメニュー、またはショートカットから範囲OCRを開始できます。</p>
+                <ul>
+                  <li>選択範囲のスクリーンショットだけをOCR</li>
+                  <li>結果は自動でコピー</li>
+                  <li>直近履歴から再コピー可能</li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        `
+      );
+    }
+
+    function renderPopupHistory() {
+      return shell(
+        "Status and recent OCR history",
+        "APIキー状態、モデル、履歴、token usageをpopupで確認できます。",
+        "Popup workflow",
+        `
+          <div class="layout">
+            ${browserFrame(`
+              <div class="sample-card">
+                <div class="sample-image-wrap">
+                  <img src="${whiteboard}" alt="">
+                  <div class="selection" style="left: 70px; top: 118px; width: 490px; height: 260px;"></div>
+                </div>
+                <div class="side-copy">
+                  <h2>OCR結果をすぐ再利用</h2>
+                  <p>履歴保存をONにすると、最近5件のプレビューとtoken usageを確認できます。</p>
+                </div>
+              </div>
+            `)}
+            <div class="popup">
+              <div class="popup-header">
+                <div>
+                  <h2>VisionClip</h2>
+                  <small>Image OCR to Clipboard</small>
+                </div>
+                <div class="tiny-actions">
+                  <span class="tiny-button">設定</span>
+                  <span class="tiny-button">更新</span>
+                </div>
+              </div>
+              <div class="primary-button">範囲OCR</div>
+              <div class="status-card">
+                <div class="status-row"><span>APIキー</span><strong>セット済み</strong></div>
+                <div class="status-row"><span>モデル</span><strong>gpt-5.4-nano</strong></div>
+                <div class="status-row"><span>状態</span><strong>コピー完了</strong></div>
+                <div class="message">OCR結果をMacのクリップボードへコピーしました。</div>
+              </div>
+              <div class="history-title"><span>最近5件</span><span class="tiny-button">履歴削除</span></div>
+              <div class="history-item">
+                <strong>ホワイトボードメモ</strong><br>
+                Sprint goal / OCR regression / modal capture...
+                <div class="usage">input 684 / output 94 tokens</div>
+              </div>
+              <div class="history-item">
+                <strong>ラベル画像</strong><br>
+                SN-2048 / KEEP DRY / 2026-06...
+                <div class="usage">input 512 / output 48 tokens</div>
+              </div>
+            </div>
+          </div>
+        `
+      );
+    }
+
+    function renderOptionsKeychain() {
+      return shell(
+        "BYOK settings with Keychain storage",
+        "OpenAI APIキーはmacOS Keychainへ保存し、Chrome拡張には保存しません。",
+        "BYOK + Keychain",
+        `
+          <div class="layout">
+            ${browserFrame(`
+              <div style="display: grid; place-items: center; height: 100%;">
+                <div class="options">
+                  <h2>VisionClip Settings</h2>
+                  <p>APIキー、OCRモデル、履歴保存の設定を管理します。</p>
+                  <div class="field">
+                    <label>OpenAI APIキー</label>
+                    <div class="input">sk-••••••••••••••••••••••••••••</div>
+                  </div>
+                  <div class="field">
+                    <label>OCRモデル</label>
+                    <div class="select"><span>gpt-5.4-nano</span><span>⌄</span></div>
+                  </div>
+                  <div class="toggle-row">
+                    <div>
+                      <strong>OCR履歴をpopupに保存する</strong>
+                      <p style="margin: 4px 0 0;">最近5件だけChrome local storageに保存します。</p>
+                    </div>
+                    <div class="toggle"></div>
+                  </div>
+                </div>
+              </div>
+            `)}
+            <aside class="panel">
+              <div class="caption">
+                <h2>自分のAPIキーで使う</h2>
+                <p>VisionClipはユーザー自身のOpenAI APIキーを使います。キーは保存時だけnative hostへ渡されます。</p>
+                <ul>
+                  <li>Keychainに保存</li>
+                  <li>モデル選択を保存</li>
+                  <li>履歴保存はOFFにできます</li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        `
+      );
+    }
+
+    function renderModalShortcut() {
+      return shell(
+        "OCR images inside modals",
+        "popupを開くと閉じるページでも、ショートカットから範囲OCRを開始できます。",
+        "Option + Shift + O",
+        `
+          <div class="layout wide">
+            ${browserFrame(`
+              <div style="position: relative; height: 100%; border-radius: 10px; background: rgba(15, 31, 51, 0.55);">
+                <div class="modal-shell">
+                  <div class="modal-bar">
+                    <span>Modal preview</span>
+                    <span>×</span>
+                  </div>
+                  <div class="modal-content">
+                    <img src="${sample}" alt="">
+                    <div class="selection" style="left: 118px; top: 122px; width: 535px; height: 285px;"></div>
+                    <div class="result-chip" style="right: 32px; bottom: 32px;">
+                      <strong>Copied to clipboard</strong>
+                      <p>モーダル内画像の文字も選択範囲だけOCRできます。</p>
+                    </div>
+                  </div>
+                </div>
+                <div style="position: absolute; left: 50px; bottom: 46px;" class="kbd">
+                  <span>Option</span><span>Shift</span><span>O</span>
+                </div>
+              </div>
+            `)}
+          </div>
+        `
+      );
+    }
+  </script>
+</body>
+</html>

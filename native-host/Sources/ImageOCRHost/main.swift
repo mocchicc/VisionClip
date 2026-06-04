@@ -5,12 +5,32 @@ import Security
 
 private enum Config {
     static let hostName = "com.mocchicc.visionclip"
+    static let legacyHostName = "com.mocchicc.image_ocr"
+    static let version = "0.1.0"
     static let keychainService = "com.mocchicc.visionclip.openai"
     static let legacyKeychainService = "com.mocchicc.image_ocr.openai"
     static let keychainAccount = "default"
     static let defaultModel = "gpt-5.4-nano"
     static let defaultDetail = "high"
     static let logPath = NSHomeDirectory() + "/Library/Logs/VisionClip/native-host.log"
+    static let userInstallDir = NSHomeDirectory() + "/Library/Application Support/VisionClip"
+    static let userChromeHostDir = NSHomeDirectory() + "/Library/Application Support/Google/Chrome/NativeMessagingHosts"
+    static let systemInstallDir = "/Library/Application Support/VisionClip"
+    static let systemChromeHostDir = "/Library/Google/Chrome/NativeMessagingHosts"
+    static let userInstalledBinaryPath = userInstallDir + "/image-ocr-host"
+    static let userInstalledWrapperPath = userInstallDir + "/visionclip-native-host"
+    static let userHostManifestPath = userChromeHostDir + "/" + hostName + ".json"
+    static let userLegacyHostManifestPath = userChromeHostDir + "/" + legacyHostName + ".json"
+    static let systemInstalledBinaryPath = systemInstallDir + "/image-ocr-host"
+    static let systemInstalledWrapperPath = systemInstallDir + "/visionclip-native-host"
+    static let systemHostManifestPath = systemChromeHostDir + "/" + hostName + ".json"
+    static let systemLegacyHostManifestPath = systemChromeHostDir + "/" + legacyHostName + ".json"
+    static let installDir = userInstallDir
+    static let chromeHostDir = userChromeHostDir
+    static let installedBinaryPath = userInstalledBinaryPath
+    static let installedWrapperPath = userInstalledWrapperPath
+    static let hostManifestPath = userHostManifestPath
+    static let legacyHostManifestPath = userLegacyHostManifestPath
     static let maxImageBytes = 50 * 1024 * 1024
     static let maxNativeResponsePreviewCharacters = 8_000
     static let defaultPrompt = """
@@ -24,6 +44,8 @@ private enum HostError: LocalizedError {
     case missingImage
     case missingAPIKey
     case invalidNativeMessage
+    case invalidExtensionID(String)
+    case invalidArgument(String)
     case unsupportedImage(String)
     case httpError(Int, String)
     case openAIError(String)
@@ -37,6 +59,10 @@ private enum HostError: LocalizedError {
             return "OpenAI API key is not set. Run image-ocr-host set-key first."
         case .invalidNativeMessage:
             return "Invalid native messaging payload."
+        case .invalidExtensionID(let extensionID):
+            return "Chrome extension ID looks invalid: \(extensionID)"
+        case .invalidArgument(let argument):
+            return "Invalid argument: \(argument)"
         case .unsupportedImage(let reason):
             return reason
         case .httpError(let status, let body):
@@ -59,6 +85,7 @@ private struct OCRRequest: Decodable {
     let prompt: String?
     let detail: String?
     let apiKey: String?
+    let checkKeychain: Bool?
 }
 
 private struct TokenUsage: Encodable {
@@ -139,6 +166,12 @@ struct ImageOCRHost {
             _ = try KeychainStore.readAPIKey()
             print("OpenAI API key is set.")
 
+        case "version", "--version", "-v":
+            print(Config.version)
+
+        case "diagnose":
+            try NativeHostDiagnostics.printReport(arguments: Array(arguments.dropFirst()))
+
         case "clear-key":
             try KeychainStore.deleteAPIKey()
             print("Deleted OpenAI API key from Keychain.")
@@ -156,7 +189,8 @@ struct ImageOCRHost {
                 model: arguments.count >= 3 ? arguments[2] : nil,
                 prompt: nil,
                 detail: nil,
-                apiKey: nil
+                apiKey: nil,
+                checkKeychain: nil
             )
             let response = try await OCRService().process(request)
             print(response.textPreview ?? "")
@@ -177,6 +211,8 @@ struct ImageOCRHost {
           image-ocr-host set-key
           image-ocr-host set-key-clipboard
           image-ocr-host check-key
+          image-ocr-host version
+          image-ocr-host diagnose [chrome-extension-id] [--check-keychain]
           image-ocr-host clear-key
           image-ocr-host ocr-url <image-url> [model]
         """)
@@ -212,8 +248,8 @@ private final class OCRService {
                 copied: nil,
                 model: Config.defaultModel,
                 error: nil,
-                keyIsSet: (try? KeychainStore.readAPIKey()) != nil,
-                version: "0.1.0"
+                keyIsSet: request.checkKeychain == false ? false : (try? KeychainStore.readAPIKey()) != nil,
+                version: Config.version
             )
         }
 
@@ -230,7 +266,7 @@ private final class OCRService {
                 model: Config.defaultModel,
                 error: nil,
                 keyIsSet: true,
-                version: "0.1.0"
+                version: Config.version
             )
         }
 
@@ -381,6 +417,133 @@ private enum KeychainStore {
     }
 }
 
+private enum NativeHostDiagnostics {
+    static func printReport(arguments: [String]) throws {
+        let options = try parseArguments(arguments)
+        let expectedExtensionID = options.expectedExtensionID
+
+        if let expectedExtensionID, !Self.isValidExtensionID(expectedExtensionID) {
+            throw HostError.invalidExtensionID(expectedExtensionID)
+        }
+
+        let executablePath = CommandLine.arguments.first ?? "unknown"
+
+        print("VisionClip native host diagnostics")
+        print("version: \(Config.version)")
+        print("defaultModel: \(Config.defaultModel)")
+        print("runningExecutable: \(executablePath)")
+        print("userInstalledBinary: \(statusLine(path: Config.userInstalledBinaryPath))")
+        print("userInstalledWrapper: \(statusLine(path: Config.userInstalledWrapperPath))")
+        print("userHostManifest: \(manifestStatus(path: Config.userHostManifestPath, expectedName: Config.hostName, expectedExtensionID: expectedExtensionID, expectedWrapperPath: Config.userInstalledWrapperPath))")
+        print("userLegacyHostManifest: \(manifestStatus(path: Config.userLegacyHostManifestPath, expectedName: Config.legacyHostName, expectedExtensionID: expectedExtensionID, expectedWrapperPath: Config.userInstalledWrapperPath))")
+        print("systemInstalledBinary: \(statusLine(path: Config.systemInstalledBinaryPath))")
+        print("systemInstalledWrapper: \(statusLine(path: Config.systemInstalledWrapperPath))")
+        print("systemHostManifest: \(manifestStatus(path: Config.systemHostManifestPath, expectedName: Config.hostName, expectedExtensionID: expectedExtensionID, expectedWrapperPath: Config.systemInstalledWrapperPath))")
+        print("systemLegacyHostManifest: \(manifestStatus(path: Config.systemLegacyHostManifestPath, expectedName: Config.legacyHostName, expectedExtensionID: expectedExtensionID, expectedWrapperPath: Config.systemInstalledWrapperPath))")
+        if options.checkKeychain {
+            print("keychainAPIKey: \(keychainStatus())")
+        } else {
+            print("keychainAPIKey: skipped (run diagnose --check-keychain to verify)")
+        }
+        print("logPath: \(Config.logPath)")
+
+        print("userCodesignCheck: codesign --verify --strict \(Config.userInstalledBinaryPath.shellQuoted)")
+        print("systemCodesignCheck: codesign --verify --strict \(Config.systemInstalledBinaryPath.shellQuoted)")
+    }
+
+    private struct Options {
+        var expectedExtensionID: String?
+        var checkKeychain = false
+    }
+
+    private static func parseArguments(_ arguments: [String]) throws -> Options {
+        var options = Options()
+
+        for argument in arguments {
+            if argument == "--check-keychain" {
+                options.checkKeychain = true
+                continue
+            }
+
+            if argument.hasPrefix("--") {
+                throw HostError.invalidArgument(argument)
+            }
+
+            guard options.expectedExtensionID == nil else {
+                throw HostError.invalidArgument(argument)
+            }
+            options.expectedExtensionID = argument
+        }
+
+        return options
+    }
+
+    private static func statusLine(path: String) -> String {
+        var isDirectory: ObjCBool = false
+        let exists = FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
+        if !exists {
+            return "missing (\(path))"
+        }
+
+        let kind = isDirectory.boolValue ? "directory" : "file"
+        let executable = FileManager.default.isExecutableFile(atPath: path) ? ", executable" : ""
+        return "present \(kind)\(executable) (\(path))"
+    }
+
+    private static func manifestStatus(path: String, expectedName: String, expectedExtensionID: String?, expectedWrapperPath: String) -> String {
+        guard FileManager.default.fileExists(atPath: path) else {
+            return "missing (\(path))"
+        }
+
+        do {
+            let data = try Data(contentsOf: URL(fileURLWithPath: path))
+            guard let root = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                return "invalid JSON root (\(path))"
+            }
+
+            let name = root["name"] as? String
+            let hostPath = root["path"] as? String
+            let type = root["type"] as? String
+            let allowedOrigins = root["allowed_origins"] as? [String] ?? []
+            var notes: [String] = []
+
+            notes.append(name == expectedName ? "name ok" : "name \(name ?? "missing")")
+            notes.append(type == "stdio" ? "type ok" : "type \(type ?? "missing")")
+            if hostPath == expectedWrapperPath {
+                notes.append("path ok")
+            } else {
+                notes.append("path \(hostPath ?? "missing")")
+            }
+
+            if let expectedExtensionID {
+                let expectedOrigin = "chrome-extension://\(expectedExtensionID)/"
+                notes.append(allowedOrigins.contains(expectedOrigin) ? "origin ok" : "origin missing \(expectedOrigin)")
+            } else {
+                notes.append("origins \(allowedOrigins.count)")
+            }
+
+            return "present (\(notes.joined(separator: ", ")))"
+        } catch {
+            return "unreadable \(error.localizedDescription) (\(path))"
+        }
+    }
+
+    private static func keychainStatus() -> String {
+        do {
+            _ = try KeychainStore.readAPIKey()
+            return "set"
+        } catch HostError.missingAPIKey {
+            return "missing"
+        } catch {
+            return "error \(error.localizedDescription)"
+        }
+    }
+
+    private static func isValidExtensionID(_ value: String) -> Bool {
+        value.range(of: #"^[a-p]{32}$"#, options: .regularExpression) != nil
+    }
+}
+
 private enum ImageInputLoader {
     static func loadDataURL(imageUrl: String?, imageDataUrl: String?) async throws -> String {
         if let imageDataUrl = imageDataUrl?.nilIfBlank {
@@ -402,7 +565,7 @@ private enum ImageInputLoader {
         }
 
         var urlRequest = URLRequest(url: url)
-        urlRequest.setValue("Mozilla/5.0 VisionClip/0.1", forHTTPHeaderField: "User-Agent")
+        urlRequest.setValue("Mozilla/5.0 VisionClip/\(Config.version)", forHTTPHeaderField: "User-Agent")
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
         if let httpResponse = response as? HTTPURLResponse, !(200..<300).contains(httpResponse.statusCode) {
@@ -652,6 +815,10 @@ private extension String {
         }
 
         return String(prefix(limit)) + "\n...[truncated]"
+    }
+
+    var shellQuoted: String {
+        "'" + replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
 }
 

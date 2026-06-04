@@ -6,7 +6,7 @@
 
 ### `activeTab`
 
-範囲OCRで現在のタブを対象にし、表示中の画面をキャプチャするために使用します。
+ユーザーが右クリックメニュー、popup、またはショートカットからOCRを開始したときに、現在のタブだけを対象にするために使用します。範囲OCRでは表示中の画面をキャプチャします。
 
 ### `contextMenus`
 
@@ -15,6 +15,10 @@
 ### `nativeMessaging`
 
 Chrome拡張からmacOS Native Messagingホストを呼び出すために使用します。Native hostはOpenAI API呼び出し、Keychain操作、macOSクリップボードコピーを担当します。
+
+### `scripting`
+
+OCR開始時に、現在のタブへ `content.js` を一時的に注入するために使用します。注入したscriptは、範囲OCRの選択UI、スクリーンショット固定表示、blob/data画像の補助取得、OCR結果toast表示に使います。
 
 ### `storage`
 
@@ -31,24 +35,16 @@ popupの履歴から抽出済みテキストを再コピーするために使用
 
 ## host permissions
 
-### `<all_urls>`
-
-画像右クリックOCRと範囲OCRを一般的なWebページで動作させるために使用します。
-
-特に、ログイン済みページ、blob URL、data URL、canvas化できる画像、モーダル上の画像などは、ページごとに画像取得方法が異なります。VisionClipは、OCR実行時に対象画像または選択範囲だけを処理します。
+現在、manifestの `host_permissions` は要求していません。
 
 ## content scripts
 
-### `<all_urls>` / `document_start`
+manifestの `content_scripts` には常時注入scriptを登録していません。
 
-右クリック対象画像の情報を事前に覚えるため、また範囲OCRの選択UIとスクリーンショット固定表示をページ上に重ねるために使用します。
+VisionClipは、ユーザーがOCRを開始したタイミングで `activeTab` と `scripting` を使い、現在のタブへ `content.js` を注入します。これにより、全ページへ常時content scriptを入れずに画像OCRと範囲OCRを実行します。
 
 content scriptはOCRを自動実行しません。OCRはユーザーが右クリックメニュー、popup、またはショートカットから開始したときだけ実行されます。
 
-## 今後の権限削減候補
+## Chrome Web Store提出時
 
-一般公開前に、次を検討します。
-
-- `activeTab` と `chrome.scripting.executeScript` を使い、常時content scriptを減らせるか検証する
-- 右クリック画像OCRとblob/data画像対応を維持したまま、host permissionsを限定できるか検証する
-- Chrome Web Store提出時の権限説明文をこの文書から作成する
+Chrome Web Store提出時の権限説明文は、この文書と [STORE_LISTING.md](./STORE_LISTING.md) の `Permission Justification` を一致させます。manifestの権限を変更した場合は、両方を更新してください。
