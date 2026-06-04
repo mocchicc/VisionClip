@@ -31,7 +31,9 @@ const publicMarkdownFiles = [
 checkRequiredFiles([
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
+  ".github/dependabot.yml",
   ".github/workflows/chrome-web-store.yml",
+  ".github/workflows/codeql.yml",
   ".github/workflows/checks.yml",
   ".github/workflows/release-artifacts.yml",
   "CHANGELOG.md",
@@ -63,6 +65,7 @@ checkPermissionsDocs();
 checkPrivacyDocs();
 checkReleaseDocs();
 checkWorkflows();
+checkGitHubMaintenance();
 checkChromeWebStoreWorkflow();
 checkDistributionSignals();
 checkNativeHostDiagnostics();
@@ -273,6 +276,46 @@ function checkWorkflows() {
   ]) {
     if (!releaseWorkflow.includes(requiredText)) {
       failures.push(`.github/workflows/release-artifacts.yml must contain ${requiredText}`);
+    }
+  }
+}
+
+function checkGitHubMaintenance() {
+  const dependabot = readText(".github/dependabot.yml");
+  const codeqlWorkflow = readText(".github/workflows/codeql.yml");
+  const releaseChecklist = readText("docs/RELEASE_CHECKLIST.md");
+
+  for (const requiredText of [
+    "package-ecosystem: \"github-actions\"",
+    "directory: \"/\"",
+    "interval: \"weekly\"",
+    "timezone: \"Asia/Tokyo\""
+  ]) {
+    if (!dependabot.includes(requiredText)) {
+      failures.push(`.github/dependabot.yml must contain ${requiredText}`);
+    }
+  }
+
+  for (const requiredText of [
+    "github/codeql-action/init@v4",
+    "github/codeql-action/analyze@v4",
+    "security-events: write",
+    "javascript-typescript",
+    "swift",
+    "swift build",
+    "schedule:"
+  ]) {
+    if (!codeqlWorkflow.includes(requiredText)) {
+      failures.push(`.github/workflows/codeql.yml must contain ${requiredText}`);
+    }
+  }
+
+  for (const requiredText of [
+    "Dependabot",
+    "CodeQL"
+  ]) {
+    if (!releaseChecklist.includes(requiredText)) {
+      failures.push(`docs/RELEASE_CHECKLIST.md must mention ${requiredText}`);
     }
   }
 }

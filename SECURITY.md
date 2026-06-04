@@ -6,6 +6,10 @@ VisionClipは、Chrome拡張とmacOS Native Messagingホストを組み合わせ
 
 現在は公開MVPのため、`main` ブランチの最新版のみをサポート対象とします。古いrelease artifactや古いローカルcheckoutで再現する問題は、まず最新版で再確認してください。
 
+## Automated Checks
+
+pull requestと`main`へのpushでは通常のrelease readiness checksを実行します。GitHub Actionsの更新はDependabotで週次確認し、CodeQLではChrome拡張のJavaScriptとmacOS Native MessagingホストのSwiftを解析します。
+
 ## Reporting a Vulnerability
 
 脆弱性や秘密情報の露出につながる可能性がある問題は、公開issueに詳細を書かないでください。
