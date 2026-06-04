@@ -28,6 +28,7 @@ VisionClip v0.1.0は、Chrome上の画像や画面の一部をOCRし、抽出し
 - `dist/visionclip-native-host-macos-<arch>-v0.1.0.zip`
 - `dist/visionclip-native-host-macos-<arch>-v0.1.0.pkg`
 - `dist/checksums-v0.1.0.txt`
+- `dist/release-qa-v0.1.0.md`
 
 生成後の確認:
 

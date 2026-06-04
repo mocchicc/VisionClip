@@ -35,6 +35,9 @@ jobs:
       - name: Smoke test release installer
         run: ./scripts/check_release_install.sh
 
+      - name: Generate release QA report
+        run: node scripts/generate_release_qa_report.js
+
       - name: Publish GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         env:
@@ -47,9 +50,9 @@ jobs:
           fi
 
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" dist/*.zip dist/*.pkg dist/checksums-*.txt --clobber
+            gh release upload "$GITHUB_REF_NAME" dist/*.zip dist/*.pkg dist/checksums-*.txt dist/release-qa-*.md --clobber
           else
-            gh release create "$GITHUB_REF_NAME" dist/*.zip dist/*.pkg dist/checksums-*.txt \
+            gh release create "$GITHUB_REF_NAME" dist/*.zip dist/*.pkg dist/checksums-*.txt dist/release-qa-*.md \
               --title "$GITHUB_REF_NAME" \
               --notes-file "$RELEASE_NOTES" \
               --verify-tag
@@ -63,5 +66,6 @@ jobs:
             dist/*.zip
             dist/*.pkg
             dist/checksums-*.txt
+            dist/release-qa-*.md
           if-no-files-found: error
           retention-days: 30

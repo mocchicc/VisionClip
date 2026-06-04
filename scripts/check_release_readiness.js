@@ -242,7 +242,8 @@ function checkWorkflows() {
     "./scripts/package_release.sh",
     "node scripts/check_release_package.js",
     "./scripts/check_native_host_pkg.sh",
-    "./scripts/check_release_install.sh"
+    "./scripts/check_release_install.sh",
+    "node scripts/generate_release_qa_report.js"
   ]) {
     if (!checksWorkflow.includes(requiredText)) {
       failures.push(`.github/workflows/checks.yml must run ${requiredText}`);
@@ -256,6 +257,7 @@ function checkWorkflows() {
     "node scripts/check_release_package.js",
     "./scripts/check_native_host_pkg.sh",
     "./scripts/check_release_install.sh",
+    "node scripts/generate_release_qa_report.js",
     "actions/upload-artifact@v4",
     "permissions:",
     "contents: write",
@@ -266,7 +268,8 @@ function checkWorkflows() {
     "--verify-tag",
     "dist/*.zip",
     "dist/*.pkg",
-    "dist/checksums-*.txt"
+    "dist/checksums-*.txt",
+    "dist/release-qa-*.md"
   ]) {
     if (!releaseWorkflow.includes(requiredText)) {
       failures.push(`.github/workflows/release-artifacts.yml must contain ${requiredText}`);

@@ -269,7 +269,7 @@ Chrome Web StoreのSecretsやDeveloper ID証明書を用意した後は、公開
 
 GitHub Actionsでも、pull requestとmainへのpush時に `./scripts/check.sh`、release artifact生成、zip内容とchecksum検証、release zip内installerのsmoke testを実行します。
 
-`v<version>` 形式のタグをpushすると、同じ検証を通したrelease artifactがGitHub Releaseへ添付されます。`Release Artifacts` workflowを手動実行した場合は、GitHub Actions artifactとして保存されます。タグ名は `extension/manifest.json` のversionと一致している必要があります。
+`v<version>` 形式のタグをpushすると、同じ検証を通したrelease artifactとrelease QA reportがGitHub Releaseへ添付されます。`Release Artifacts` workflowを手動実行した場合は、GitHub Actions artifactとして保存されます。タグ名は `extension/manifest.json` のversionと一致している必要があります。
 
 拡張アイコンは `assets/extension-icon-source.png` から生成しています。source画像を差し替えた場合は、次を実行して `extension/icons/` のPNGを更新してください。
 
@@ -333,6 +333,7 @@ git push origin v0.1.0
 - `dist/visionclip-native-host-macos-<arch>-v<version>.zip`
 - `dist/visionclip-native-host-macos-<arch>-v<version>.pkg`
 - `dist/checksums-v<version>.txt`
+- `dist/release-qa-v<version>.md`
 
 native host zipには、build済み `image-ocr-host`、配布zip内から実行する `install_native_host.sh` / `uninstall_native_host.sh`、README、CHANGELOG、security/support/contributing docs、サンプル画像、告知用画像素材が含まれます。native host pkgはsystem-wideのNative Messaging manifestを `/Library/Google/Chrome/NativeMessagingHosts/` へ置く配布候補です。現時点ではDeveloper ID署名・notarization済み配布ではありません。
 

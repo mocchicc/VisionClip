@@ -27,3 +27,6 @@ jobs:
 
       - name: Smoke test release installer
         run: ./scripts/check_release_install.sh
+
+      - name: Generate release QA report
+        run: node scripts/generate_release_qa_report.js
