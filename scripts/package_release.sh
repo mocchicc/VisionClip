@@ -12,6 +12,7 @@ EXTENSION_ZIP="$DIST_DIR/visionclip-extension-v$VERSION.zip"
 NATIVE_ZIP="$DIST_DIR/visionclip-native-host-macos-$ARCH-v$VERSION.zip"
 CHECKSUMS_FILE="$DIST_DIR/checksums-v$VERSION.txt"
 CODESIGN_IDENTITY="${VISIONCLIP_CODESIGN_IDENTITY:-}"
+RELEASE_EXTENSION_IDS="${VISIONCLIP_RELEASE_EXTENSION_IDS:-bficjnhffakpmfcjbjjcanabccfldfhk}"
 SIGNING_STATUS="unsigned"
 
 trap 'rm -rf "$WORK_DIR"' EXIT
@@ -67,8 +68,12 @@ fi
   shasum -a 256 "$(basename "$EXTENSION_ZIP")" "$(basename "$NATIVE_ZIP")" > "$(basename "$CHECKSUMS_FILE")"
 )
 
+read -r -a RELEASE_EXTENSION_ID_ARGS <<< "$RELEASE_EXTENSION_IDS"
+"$ROOT_DIR/scripts/package_native_host_pkg.sh" "${RELEASE_EXTENSION_ID_ARGS[@]}"
+
 echo "Created release artifacts:"
 echo "  $EXTENSION_ZIP"
 echo "  $NATIVE_ZIP"
+echo "  $DIST_DIR/visionclip-native-host-macos-$ARCH-v$VERSION.pkg"
 echo "  $CHECKSUMS_FILE"
 echo "Native host signing: $SIGNING_STATUS"

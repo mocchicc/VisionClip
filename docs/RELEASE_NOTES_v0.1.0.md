@@ -2,7 +2,7 @@
 
 VisionClip v0.1.0は、Chrome上の画像や画面の一部をOCRし、抽出したテキストをmacOSのクリップボードへコピーする公開MVPです。
 
-このリリースは、個人利用や、仕組みを理解している人が手元で試す用途を想定しています。Chrome Web Store配布、macOSアプリ化、署名・notarization、正式installer化はまだ未対応です。
+このリリースは、個人利用や、仕組みを理解している人が手元で試す用途を想定しています。Chrome Web Store配布、macOSアプリ化、Developer ID署名・notarization済み配布はまだ未対応です。
 
 ## Highlights
 
@@ -13,7 +13,7 @@ VisionClip v0.1.0は、Chrome上の画像や画面の一部をOCRし、抽出し
 - OpenAI APIキーをmacOS Keychainに保存
 - OCRモデル選択、token usage表示、最近5件の履歴、履歴削除、履歴保存OFF
 - `samples/index.html` によるローカルOCR smoke fixture
-- extension zip / native host zip / checksum生成
+- extension zip / native host zip / native host pkg / checksum生成
 - release artifact検証、Native Messaging status検証、release installer smoke検証
 
 ## Artifacts
@@ -22,6 +22,7 @@ VisionClip v0.1.0は、Chrome上の画像や画面の一部をOCRし、抽出し
 
 - `dist/visionclip-extension-v0.1.0.zip`
 - `dist/visionclip-native-host-macos-<arch>-v0.1.0.zip`
+- `dist/visionclip-native-host-macos-<arch>-v0.1.0.pkg`
 - `dist/checksums-v0.1.0.txt`
 
 生成後の確認:
@@ -30,6 +31,7 @@ VisionClip v0.1.0は、Chrome上の画像や画面の一部をOCRし、抽出し
 ./scripts/check.sh
 ./scripts/package_release.sh
 node scripts/check_release_package.js
+./scripts/check_native_host_pkg.sh
 ./scripts/check_release_install.sh
 ```
 
@@ -58,7 +60,7 @@ node scripts/check_release_package.js
 
 - GitHubからの手動セットアップ前提です。
 - Chrome Web Store配布はまだ行っていません。
-- macOS native hostは署名・notarization済みinstallerではありません。
+- macOS native hostのpkgは生成できますが、Developer ID署名・notarization済み配布ではありません。
 - ユーザー自身のOpenAI APIキーが必要です。
 - ログインが必要なページや動的な画像表示では、直接画像OCRではなく範囲OCRが必要になる場合があります。
 

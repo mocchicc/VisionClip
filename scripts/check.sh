@@ -31,8 +31,10 @@ ruby -e "require 'yaml'; Dir['.github/**/*.yml'].sort.each { |path| YAML.load_fi
 
 bash -n scripts/install_native_host.sh
 bash -n scripts/install_release_native_host.sh
+bash -n scripts/check_native_host_pkg.sh
 bash -n scripts/check_release_install.sh
 bash -n scripts/generate_store_screenshots.sh
+bash -n scripts/package_native_host_pkg.sh
 bash -n scripts/package_release.sh
 bash -n scripts/upload_chrome_web_store.sh
 bash -n scripts/uninstall_native_host.sh

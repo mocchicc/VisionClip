@@ -48,7 +48,9 @@ checkRequiredFiles([
   "assets/store/screenshot-source.html",
   "scripts/generate_store_screenshots.sh",
   "scripts/check.sh",
+  "scripts/check_native_host_pkg.sh",
   "scripts/package_release.sh",
+  "scripts/package_native_host_pkg.sh",
   "scripts/check_release_package.js",
   "scripts/check_release_install.sh",
   "scripts/upload_chrome_web_store.sh",
@@ -200,6 +202,7 @@ function checkWorkflows() {
     "./scripts/check.sh",
     "./scripts/package_release.sh",
     "node scripts/check_release_package.js",
+    "./scripts/check_native_host_pkg.sh",
     "./scripts/check_release_install.sh"
   ]) {
     if (!checksWorkflow.includes(requiredText)) {
@@ -212,6 +215,7 @@ function checkWorkflows() {
     "./scripts/check.sh",
     "./scripts/package_release.sh",
     "node scripts/check_release_package.js",
+    "./scripts/check_native_host_pkg.sh",
     "./scripts/check_release_install.sh",
     "actions/upload-artifact@v4",
     "permissions:",
@@ -222,6 +226,7 @@ function checkWorkflows() {
     "RELEASE_NOTES_",
     "--verify-tag",
     "dist/*.zip",
+    "dist/*.pkg",
     "dist/checksums-*.txt"
   ]) {
     if (!releaseWorkflow.includes(requiredText)) {
@@ -268,6 +273,7 @@ function checkChromeWebStoreWorkflow() {
 
 function checkDistributionSignals() {
   const packageScript = readText("scripts/package_release.sh");
+  const pkgScript = readText("scripts/package_native_host_pkg.sh");
   const macosDoc = readText("docs/MACOS_DISTRIBUTION.md");
 
   for (const requiredText of [
@@ -281,7 +287,23 @@ function checkDistributionSignals() {
   }
 
   for (const requiredText of [
+    "pkgbuild",
+    "VISIONCLIP_CODESIGN_IDENTITY",
+    "VISIONCLIP_PKG_SIGN_IDENTITY",
+    "VISIONCLIP_NOTARY_PROFILE",
+    "xcrun notarytool",
+    "xcrun stapler",
+    "/Library/Google/Chrome/NativeMessagingHosts",
+    "/Library/Application Support/VisionClip"
+  ]) {
+    if (!pkgScript.includes(requiredText)) {
+      failures.push(`scripts/package_native_host_pkg.sh must contain ${requiredText}`);
+    }
+  }
+
+  for (const requiredText of [
     "notarytool",
+    "package_native_host_pkg.sh",
     "spctl --assess",
     "正式配布前の残タスク"
   ]) {
@@ -313,11 +335,12 @@ function collectManualBlockers() {
     manualBlockers.push("Chrome Web Store publishing is not configured; choose Store, unlisted, organization, or manual GitHub distribution.");
   }
 
-  if (!hasAnyFileMatching(["pkg", "dmg"])) {
+  const releaseWorkflow = readText(".github/workflows/release-artifacts.yml");
+  if (!fs.existsSync(path.join(root, "scripts/package_native_host_pkg.sh")) ||
+      !releaseWorkflow.includes("dist/*.pkg")) {
     manualBlockers.push("No pkg/dmg installer exists yet; broad macOS distribution still needs installer/notarization direction.");
   }
 
-  const releaseWorkflow = readText(".github/workflows/release-artifacts.yml");
   if (!/gh release (create|upload)/i.test(releaseWorkflow)) {
     manualBlockers.push("GitHub Releases upload is not automated; current workflow stores Actions artifacts only.");
   }

@@ -11,10 +11,12 @@ const arch = os.machine();
 const distDir = path.join(root, "dist");
 const extensionZip = path.join(distDir, `visionclip-extension-v${version}.zip`);
 const nativeZip = path.join(distDir, `visionclip-native-host-macos-${arch}-v${version}.zip`);
+const nativePkg = path.join(distDir, `visionclip-native-host-macos-${arch}-v${version}.pkg`);
 const checksumsFile = path.join(distDir, `checksums-v${version}.txt`);
 
 assertFile(extensionZip);
 assertFile(nativeZip);
+assertFile(nativePkg);
 assertFile(checksumsFile);
 
 const extensionEntries = listZipEntries(extensionZip);
@@ -87,7 +89,8 @@ if (licenseFile) {
 
 verifyChecksums([
   path.basename(extensionZip),
-  path.basename(nativeZip)
+  path.basename(nativeZip),
+  path.basename(nativePkg)
 ]);
 
 function assertFile(filePath) {

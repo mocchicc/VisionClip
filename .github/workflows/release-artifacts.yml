@@ -29,6 +29,9 @@ jobs:
       - name: Verify release artifacts
         run: node scripts/check_release_package.js
 
+      - name: Smoke test native host pkg
+        run: ./scripts/check_native_host_pkg.sh
+
       - name: Smoke test release installer
         run: ./scripts/check_release_install.sh
 
@@ -44,9 +47,9 @@ jobs:
           fi
 
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" dist/*.zip dist/checksums-*.txt --clobber
+            gh release upload "$GITHUB_REF_NAME" dist/*.zip dist/*.pkg dist/checksums-*.txt --clobber
           else
-            gh release create "$GITHUB_REF_NAME" dist/*.zip dist/checksums-*.txt \
+            gh release create "$GITHUB_REF_NAME" dist/*.zip dist/*.pkg dist/checksums-*.txt \
               --title "$GITHUB_REF_NAME" \
               --notes-file "$RELEASE_NOTES" \
               --verify-tag
@@ -58,6 +61,7 @@ jobs:
           name: visionclip-release-${{ github.run_number }}
           path: |
             dist/*.zip
+            dist/*.pkg
             dist/checksums-*.txt
           if-no-files-found: error
           retention-days: 30
