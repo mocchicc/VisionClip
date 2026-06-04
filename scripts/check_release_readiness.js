@@ -46,6 +46,7 @@ checkRequiredFiles([
   "docs/MACOS_DISTRIBUTION.md",
   "docs/PRIVACY.md",
   "docs/RELEASE_CHECKLIST.md",
+  "docs/RELEASE_RUNBOOK.md",
   "docs/STORE_LISTING.md",
   `docs/RELEASE_NOTES_v${manifest.version}.md`,
   "assets/store/screenshot-source.html",
@@ -200,6 +201,7 @@ function checkPrivacyDocs() {
 function checkReleaseDocs() {
   const readme = readText("README.md");
   const releaseChecklist = readText("docs/RELEASE_CHECKLIST.md");
+  const releaseRunbook = readText("docs/RELEASE_RUNBOOK.md");
 
   for (const requiredText of [
     "./scripts/check.sh",
@@ -208,7 +210,8 @@ function checkReleaseDocs() {
     "node scripts/generate_release_qa_report.js",
     "./scripts/check_release_preflight.sh",
     "./scripts/check_release_install.sh",
-    "docs/RELEASE_CHECKLIST.md"
+    "docs/RELEASE_CHECKLIST.md",
+    "docs/RELEASE_RUNBOOK.md"
   ]) {
     if (!readme.includes(requiredText)) {
       failures.push(`README.md must mention release command or doc: ${requiredText}`);
@@ -222,10 +225,32 @@ function checkReleaseDocs() {
     "GitHub Release",
     "release-qa-v",
     "check_release_preflight.sh",
-    "実機表示"
+    "実機表示",
+    "RELEASE_RUNBOOK.md"
   ]) {
     if (!releaseChecklist.includes(requiredText)) {
       failures.push(`docs/RELEASE_CHECKLIST.md must keep manual release blocker: ${requiredText}`);
+    }
+  }
+
+  for (const requiredText of [
+    "Release Runbook",
+    "LICENSE",
+    "node scripts/check_release_readiness.js --strict",
+    "./scripts/package_release.sh",
+    "VISIONCLIP_RELEASE_EXTENSION_IDS",
+    "node scripts/check_release_package.js",
+    "./scripts/check_native_host_pkg.sh",
+    "node scripts/generate_release_qa_report.js",
+    "./scripts/check_release_preflight.sh --store-only --online",
+    "./scripts/check_release_preflight.sh --macos-only --online",
+    "git tag v<version>",
+    "git push origin v<version>",
+    "spctl --assess --type install",
+    "uninstall_native_host_system.sh"
+  ]) {
+    if (!releaseRunbook.includes(requiredText)) {
+      failures.push(`docs/RELEASE_RUNBOOK.md must mention release step: ${requiredText}`);
     }
   }
 

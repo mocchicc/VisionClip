@@ -15,7 +15,7 @@ VisionClipを公開するときのX投稿文と添付画像候補です。大げ
 - `assets/social/x-imagegen-workflow-keychain.png`
   OCRからclipboard、BYOK/Keychainまでの流れを1枚で説明したいときに向いています。
 - `assets/social/x-imagegen-launch-desk.png`
-  ツールの雰囲気を柔らかく見せたいローンチ告知向けです。
+  画像内の文字を再利用できるテキストへ戻す流れを、ロゴなしで見せたい告知向けです。
 - `assets/store/promotional-small.png`  
   Chrome Web Store small promotional image向けの440x280画像です。
 

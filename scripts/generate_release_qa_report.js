@@ -27,6 +27,7 @@ const requiredDocs = [
   "docs/STORE_LISTING.md",
   "docs/MACOS_DISTRIBUTION.md",
   "docs/RELEASE_CHECKLIST.md",
+  "docs/RELEASE_RUNBOOK.md",
   `docs/RELEASE_NOTES_v${version}.md`
 ];
 const requiredAssets = [
