@@ -58,6 +58,12 @@ VISIONCLIP_PKG_SIGN_IDENTITY="Developer ID Installer: Example Name (TEAMID)" \
 ./scripts/package_release.sh
 ```
 
+証明書と環境変数を入れた後、pkg作成前にpreflightを実行できます。
+
+```sh
+./scripts/check_release_preflight.sh --macos-only
+```
+
 ## notarizationの流れ
 
 notarizationにはApple Developer Program、Developer ID証明書、notarytool用の認証情報が必要です。
@@ -73,6 +79,12 @@ VISIONCLIP_NOTARY_PROFILE="visionclip-notary" \
 ```
 
 `VISIONCLIP_NOTARY_PROFILE` を指定すると、pkg作成後に `xcrun notarytool submit --wait` と `xcrun stapler staple` を実行します。zipで配布する場合、notarization ticketをzip自体へstapleする運用ではありません。正式配布では、notarized pkgまたはdmgにするか、Gatekeeperでの実際の評価を確認したうえで配布形式を決めてください。
+
+notarytool profileの認証まで確認する場合は、`--online` を付けます。
+
+```sh
+./scripts/check_release_preflight.sh --macos-only --online
+```
 
 ## 検証コマンド
 

@@ -198,6 +198,13 @@ GitHub Secrets:
 - `CWS_CLIENT_SECRET`
 - `CWS_REFRESH_TOKEN`
 
+Secretsを設定した後、draft upload前にローカルまたは同等の環境でpreflightを実行します。通常は秘密値を表示せず、環境変数の存在、拡張ID形式、release zip、必須CLIだけを確認します。`--online` を付けるとGoogle OAuth token取得まで確認します。
+
+```sh
+./scripts/check_release_preflight.sh --store-only
+./scripts/check_release_preflight.sh --store-only --online
+```
+
 workflowは `./scripts/check.sh`、`./scripts/package_release.sh`、`node scripts/check_release_package.js` を通したextension zipだけをChrome Web Store API v2へ送ります。`publish=true` を選ばない限り、review submitは行いません。
 
 Chrome Web Store APIでpublishする前に、Developer Dashboard側でStore listingとPrivacyタブを埋めておく必要があります。visibilityをDeveloper Dashboardで手動変更した場合、そのvisibilityで一度手動publishしないとAPI publishできないことがあります。

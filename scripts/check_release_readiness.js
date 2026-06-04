@@ -53,6 +53,7 @@ checkRequiredFiles([
   "scripts/package_native_host_pkg.sh",
   "scripts/check_release_package.js",
   "scripts/check_release_install.sh",
+  "scripts/check_release_preflight.sh",
   "scripts/upload_chrome_web_store.sh",
   ...storeScreenshotFiles
 ]);
@@ -173,6 +174,7 @@ function checkReleaseDocs() {
     "./scripts/check.sh",
     "./scripts/package_release.sh",
     "node scripts/check_release_package.js",
+    "./scripts/check_release_preflight.sh",
     "./scripts/check_release_install.sh",
     "docs/RELEASE_CHECKLIST.md"
   ]) {
@@ -186,11 +188,17 @@ function checkReleaseDocs() {
     "unlisted公開",
     "notarization",
     "GitHub Release",
+    "check_release_preflight.sh",
     "実機表示"
   ]) {
     if (!releaseChecklist.includes(requiredText)) {
       failures.push(`docs/RELEASE_CHECKLIST.md must keep manual release blocker: ${requiredText}`);
     }
+  }
+
+  const checkScript = readText("scripts/check.sh");
+  if (!checkScript.includes("bash -n scripts/check_release_preflight.sh")) {
+    failures.push("scripts/check.sh must syntax-check scripts/check_release_preflight.sh");
   }
 }
 
@@ -269,6 +277,22 @@ function checkChromeWebStoreWorkflow() {
       failures.push(`scripts/upload_chrome_web_store.sh must contain ${requiredText}`);
     }
   }
+
+  const preflightScript = readText("scripts/check_release_preflight.sh");
+  for (const requiredText of [
+    "CWS_PUBLISHER_ID",
+    "CWS_EXTENSION_ID",
+    "CWS_CLIENT_ID",
+    "CWS_CLIENT_SECRET",
+    "CWS_REFRESH_TOKEN",
+    "https://oauth2.googleapis.com/token",
+    "--store-only",
+    "--online"
+  ]) {
+    if (!preflightScript.includes(requiredText)) {
+      failures.push(`scripts/check_release_preflight.sh must contain Chrome Web Store preflight signal: ${requiredText}`);
+    }
+  }
 }
 
 function checkDistributionSignals() {
@@ -293,11 +317,14 @@ function checkDistributionSignals() {
     "VISIONCLIP_NOTARY_PROFILE",
     "xcrun notarytool",
     "xcrun stapler",
+    "--macos-only",
     "/Library/Google/Chrome/NativeMessagingHosts",
     "/Library/Application Support/VisionClip"
   ]) {
-    if (!pkgScript.includes(requiredText)) {
-      failures.push(`scripts/package_native_host_pkg.sh must contain ${requiredText}`);
+    const source = requiredText === "--macos-only" ? readText("scripts/check_release_preflight.sh") : pkgScript;
+    const sourceLabel = requiredText === "--macos-only" ? "scripts/check_release_preflight.sh" : "scripts/package_native_host_pkg.sh";
+    if (!source.includes(requiredText)) {
+      failures.push(`${sourceLabel} must contain ${requiredText}`);
     }
   }
 

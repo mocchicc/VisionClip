@@ -254,6 +254,13 @@ APIキーも消したい場合は、先に次を実行します。
 node scripts/check_release_readiness.js --strict
 ```
 
+Chrome Web StoreのSecretsやDeveloper ID証明書を用意した後は、公開直前の資格情報preflightを実行します。通常は秘密値を表示せずに環境変数、証明書、notarytool profile名、必須CLIを確認します。実際のOAuth / notarytool認証まで確認する場合は `--online` を付けます。
+
+```sh
+./scripts/check_release_preflight.sh
+./scripts/check_release_preflight.sh --online
+```
+
 GitHub Actionsでも、pull requestとmainへのpush時に `./scripts/check.sh`、release artifact生成、zip内容とchecksum検証、release zip内installerのsmoke testを実行します。
 
 `v<version>` 形式のタグをpushすると、同じ検証を通したrelease artifactがGitHub Releaseへ添付されます。`Release Artifacts` workflowを手動実行した場合は、GitHub Actions artifactとして保存されます。タグ名は `extension/manifest.json` のversionと一致している必要があります。
@@ -280,6 +287,12 @@ Chrome拡張zip、macOS Native Messagingホストzip、SHA-256 checksumを `dist
 
 ```sh
 ./scripts/package_release.sh
+```
+
+Chrome Web StoreとmacOS署名/notarizationの資格情報をrelease前にまとめて確認する場合:
+
+```sh
+./scripts/check_release_preflight.sh
 ```
 
 生成後にrelease zipの中身とchecksumを確認する場合は、次を実行します。
