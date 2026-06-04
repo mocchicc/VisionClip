@@ -15,6 +15,7 @@ VisionClip v0.1.0は、Chrome上の画像や画面の一部をOCRし、抽出し
 - `samples/index.html` によるローカルOCR smoke fixture
 - extension zip / native host zip / native host pkg / checksum生成
 - release artifact検証、Native Messaging status検証、release installer smoke検証
+- release QA report生成
 - Chrome Web Store / Developer ID / notarization資格情報のrelease preflight
 - Chrome Web StoreのPrivacyタブ向けSingle purpose、User data usage、Limited Use草案
 
@@ -34,6 +35,7 @@ VisionClip v0.1.0は、Chrome上の画像や画面の一部をOCRし、抽出し
 ./scripts/package_release.sh
 node scripts/check_release_package.js
 ./scripts/check_native_host_pkg.sh
+node scripts/generate_release_qa_report.js
 ./scripts/check_release_install.sh
 ```
 

@@ -54,6 +54,7 @@ checkRequiredFiles([
   "scripts/check_release_package.js",
   "scripts/check_release_install.sh",
   "scripts/check_release_preflight.sh",
+  "scripts/generate_release_qa_report.js",
   "scripts/upload_chrome_web_store.sh",
   ...storeScreenshotFiles
 ]);
@@ -198,6 +199,7 @@ function checkReleaseDocs() {
     "./scripts/check.sh",
     "./scripts/package_release.sh",
     "node scripts/check_release_package.js",
+    "node scripts/generate_release_qa_report.js",
     "./scripts/check_release_preflight.sh",
     "./scripts/check_release_install.sh",
     "docs/RELEASE_CHECKLIST.md"
@@ -212,6 +214,7 @@ function checkReleaseDocs() {
     "unlisted公開",
     "notarization",
     "GitHub Release",
+    "release-qa-v",
     "check_release_preflight.sh",
     "実機表示"
   ]) {
@@ -223,6 +226,9 @@ function checkReleaseDocs() {
   const checkScript = readText("scripts/check.sh");
   if (!checkScript.includes("bash -n scripts/check_release_preflight.sh")) {
     failures.push("scripts/check.sh must syntax-check scripts/check_release_preflight.sh");
+  }
+  if (!checkScript.includes("node --check scripts/generate_release_qa_report.js")) {
+    failures.push("scripts/check.sh must syntax-check scripts/generate_release_qa_report.js");
   }
 }
 

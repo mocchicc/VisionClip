@@ -16,6 +16,7 @@ node --check extension/popup.js
 node --check scripts/check_extension_assets.js
 node --check scripts/check_release_assets.js
 node --check scripts/check_release_package.js
+node --check scripts/generate_release_qa_report.js
 node --check scripts/check_release_tag.js
 node --check scripts/check_license_policy.js
 node --check scripts/check_release_readiness.js

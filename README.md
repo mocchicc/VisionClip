@@ -302,6 +302,12 @@ node scripts/check_release_package.js
 ./scripts/check_native_host_pkg.sh bficjnhffakpmfcjbjjcanabccfldfhk
 ```
 
+公開前の検証結果をMarkdownで残す場合は、次を実行します。`dist/release-qa-v<version>.md` に、version、commit、artifact、checksum、readiness blocker、必須docs/assetsの存在をまとめます。
+
+```sh
+node scripts/generate_release_qa_report.js
+```
+
 release zip内の `install_native_host.sh` が一時HOMEへ正しくインストールできるか確認する場合は、次を実行します。
 
 ```sh

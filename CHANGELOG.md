@@ -21,7 +21,7 @@ Initial public MVP release.
 - Sample OCR fixture page and generated sample images under `samples/`.
 - Extension icon assets, social announcement images, and Chrome Web Store promotional image candidate.
 - Release packaging scripts for extension zip, macOS native host zip, and system-wide macOS native host pkg artifacts.
-- Release artifact verification, native messaging smoke tests, pkg allowed-origin checks, installer smoke tests, release preflight, and version consistency checks.
+- Release artifact verification, native messaging smoke tests, pkg allowed-origin checks, installer smoke tests, release preflight, release QA report generation, and version consistency checks.
 - Public project docs: README, privacy notice, permissions rationale, support, security, contributing, store listing draft, macOS distribution notes, and announcement drafts.
 
 ### Security and Privacy
