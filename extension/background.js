@@ -96,6 +96,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }));
     return true;
   }
+
+  if (message?.type === "region_ocr_start_failed") {
+    saveCurrentStatus({
+      state: "error",
+      title: "範囲OCR開始失敗",
+      message: message.error || "範囲OCRを開始できませんでした。",
+      updatedAt: Date.now()
+    })
+      .then(() => setBadge("ERR", "#b91c1c"))
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) => sendResponse({
+        ok: false,
+        error: error?.message || String(error)
+      }));
+    return true;
+  }
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -183,6 +199,7 @@ async function startRegionOCR(targetTab = null) {
   if (!tab?.id || tab.windowId == null) {
     throw new Error("OCRするタブを見つけられませんでした。");
   }
+  assertRegionOCRTab(tab);
 
   const startedAt = Date.now();
   await setBadge("SEL", "#4f46e5");
@@ -194,27 +211,33 @@ async function startRegionOCR(targetTab = null) {
     updatedAt: startedAt
   });
 
-  await ensureContentScript(tab.id);
+  await ensureContentScriptReady(tab.id);
 
   const screenshotDataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, {
     format: "png"
   });
 
-  chrome.tabs.sendMessage(tab.id, {
+  const response = await chrome.tabs.sendMessage(tab.id, {
     type: "start_region_selection",
     screenshotDataUrl
-  }).catch(async (error) => {
-    await setBadge("ERR", "#b91c1c");
-    await saveCurrentStatus({
-      state: "error",
-      title: "範囲OCR開始失敗",
-      message: error?.message || String(error),
-      updatedAt: Date.now()
-    });
-    setTimeout(() => chrome.action.setBadgeText({ text: "" }), 3500);
   });
 
+  if (!response?.ok) {
+    throw new Error(response?.error || "範囲OCRを開始できませんでした。");
+  }
+
   return { ok: true };
+}
+
+function assertRegionOCRTab(tab) {
+  const url = tab.url || "";
+  if (!url) {
+    return;
+  }
+
+  if (/^(chrome|chrome-extension|edge|about|devtools):/i.test(url)) {
+    throw new Error("このページではChromeの制限により範囲OCRを開始できません。通常のWebページで試してください。");
+  }
 }
 
 async function handleRegionOCRStartError(error) {
@@ -409,6 +432,40 @@ async function ensureContentScript(tabId) {
     target: { tabId },
     files: ["content.js"]
   });
+}
+
+async function ensureContentScriptReady(tabId) {
+  let lastError = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      await ensureContentScript(tabId);
+      const response = await chrome.tabs.sendMessage(tabId, { type: "visionclip_ping" });
+      if (response?.ok) {
+        return;
+      }
+      throw new Error(response?.error || "範囲OCRの受け口を確認できませんでした。");
+    } catch (error) {
+      lastError = error;
+      if (!isMissingContentScriptError(error) || attempt === 1) {
+        break;
+      }
+      await delay(80);
+    }
+  }
+
+  const message = lastError?.message || String(lastError);
+  if (isMissingContentScriptError(lastError)) {
+    throw new Error("範囲OCRを開始できませんでした。ページを再読み込みしてから、もう一度試してください。");
+  }
+  throw new Error(message);
+}
+
+function isMissingContentScriptError(error) {
+  return /Receiving end does not exist|Could not establish connection/i.test(error?.message || String(error || ""));
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function getRecentContextImage(tabId, srcUrl) {

@@ -32,19 +32,25 @@ globalThis.__visionclipContextMenuHandler = onContextMenu;
 
 try {
   const onRuntimeMessage = (message, _sender, sendResponse) => {
+    if (message?.type === "visionclip_ping") {
+      sendResponse({ ok: true });
+      return;
+    }
+
     if (message?.type === "show_ocr_toast") {
       showOCRToast(message.title, message.message, message.level);
       return;
     }
 
     if (message?.type === "start_region_selection") {
-      startRegionSelection(message.screenshotDataUrl)
-        .then(sendResponse)
-        .catch((error) => sendResponse({
-          ok: false,
+      startRegionSelection(message.screenshotDataUrl).catch((error) => {
+        sendRuntimeMessageSafely({
+          type: "region_ocr_start_failed",
           error: error?.message || String(error)
-        }));
-      return true;
+        });
+      });
+      sendResponse({ ok: true });
+      return;
     }
 
     if (message?.type === "capture_image_by_url") {
